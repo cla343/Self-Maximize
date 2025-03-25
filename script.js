@@ -1,32 +1,22 @@
 function getCurrentWeekRange() {
     let today = new Date();
     let dayIndex = today.getDay();
-
     let daysToMonday = dayIndex === 0 ? 6 : dayIndex - 1;
-
     let startOfWeek = new Date(today);
     startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
-
     let endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    let options = {
-        month: 'short', day: 'numeric'
-    };
-    let startStr = startOfWeek.toLocaleDateString('en-US', options);
-    let endStr = endOfWeek.toLocaleDateString('en-US', options);
-
+    let startStr = startOfWeek.toISOString().split('T')[0]; // Format YYYY-MM-DD
+    let endStr = endOfWeek.toISOString().split('T')[0]; // Format YYYY-MM-DD
     return `${startStr} - ${endStr}`;
 }
 
 const lastWeek = localStorage.getItem('lastWeek');
-
 const week = document.querySelector('.week');
 week.textContent = getCurrentWeekRange();
 
 const focus = document.querySelector('.primary-focus');
 focus.innerHTML = '<span>Primary Focus:</span> <div class="focus-input" contenteditable="true"></div>';
-
 const input = document.querySelector('.focus-input');
 input.addEventListener('input', () => {
     localStorage.setItem('primaryFocus', input.innerText);
@@ -34,7 +24,6 @@ input.addEventListener('input', () => {
 
 const notes = document.querySelector('.notes');
 const notesHeader = notes.querySelector('.header');
-
 notesHeader.innerHTML = '<span>Notes & Adjustments for the Week</span> <div class="notes-input" contenteditable="true"></div>';
 notesHeader.querySelector('span').style.fontSize = '18px';
 notesHeader.querySelector('span').style.fontWeight = 'bold';
@@ -74,7 +63,7 @@ function createPermanentRow() {
 
 createPermanentRow();
 
-function createRow(columns = 2, rowIndex = container.children.length) {
+function createRow(columns = 2, rowIndex = savedRowCount) {
     const row = document.createElement('div');
     row.classList.add('grid-row');
     row.style.display = 'grid';
@@ -103,10 +92,11 @@ function createRow(columns = 2, rowIndex = container.children.length) {
     deleteButton.style.borderRadius = '5px';
     deleteButton.style.padding = '5px 10px';
     deleteButton.onclick = () => {
-        const rowIndex = Array.from(container.children).indexOf(row); // **Updated deletion logic**
+        const rowIndex = Array.from(container.children).indexOf(row); 
         container.removeChild(row);
         removeRowFromStorage(rowIndex);
         updateRowIndices();
+        createPermanentChecklist(); 
     };
 
     const deleteCell = document.createElement('div');
@@ -119,13 +109,19 @@ function createRow(columns = 2, rowIndex = container.children.length) {
     container.appendChild(row);
 }
 
+let savedRowCount = parseInt(localStorage.getItem('savedRowCount') || '0', 10);
+
+localStorage.setItem('savedRowCount', savedRowCount);
+
 function updateRowIndices() {
     const rows = container.children;
-    rows.forEach((row, rowIndex) => {
+    const weekRange = getCurrentWeekRange(); 
+    Array.from(rows).forEach((row, rowIndex) => {
+        if (rowIndex === 0) return;
         const cells = row.children;
         for (let colIndex = 0; colIndex < cells.length - 1; colIndex++) {
             const oldKey = `cell-${rowIndex + 1}-${colIndex}-${getCurrentWeekRange()}`;
-            const newKey = `cell-${rowIndex}-${colIndex}-${getCurrentWeekRange()}`;
+            const newKey = `cell-${rowIndex}-${colIndex}-${weekRange}`;
             const value = localStorage.getItem(oldKey);
             if (value) {
                 localStorage.setItem(newKey, value);
@@ -133,41 +129,40 @@ function updateRowIndices() {
             }
         }
     });
+    savedRowCount = rows.length - 1;
+    localStorage.setItem('savedRowCount', savedRowCount);
 }
 
 function loadSavedRows() {
-    let rowIndex = 0;
-    while (true) {
-        let cellValue = getSavedCellValue(rowIndex, 0);
-        if (!cellValue && !getSavedCellValue(rowIndex, 1)) break;
+    const savedRowCount = parseInt(localStorage.getItem('savedRowCount') || '0', 10);
+    container.innerHTML = '';
+    createPermanentRow();
+    for (let rowIndex = 0; rowIndex < savedRowCount; rowIndex++) {
         createRow(2, rowIndex);
-        rowIndex++;
-    }
-}
-
-function saveCellValue(row, col, value) {
-    const key = `cell-${row}-${col}-${getCurrentWeekRange()}`;
-    localStorage.setItem(key, value);
-}
-
-function getSavedCellValue(row, col) {
-    const key = `cell-${row}-${col}-${getCurrentWeekRange()}`;
-    return localStorage.getItem(key) || '';
-}
-
-function removeRowFromStorage(row) {
-    const rowElement = container.children[row];
-    if (!rowElement) return;
-
-    const colCount = rowElement.children.length;
-
-    for (let col = 0; col < colCount; col++) {
-        const key = `cell-${row}-${col}-${getCurrentWeekRange()}`;
-        localStorage.removeItem(key); // **Correctly removing stored row data**
     }
 }
 
 loadSavedRows();
+
+function saveCellValue(rowIndex, colIndex, value) {
+    const key = `cell-${rowIndex}-${colIndex}`;
+    localStorage.setItem(key, value);
+}
+
+function getSavedCellValue(row, col) {
+    const key = `cell-${row}-${col}`;
+    return localStorage.getItem(key) || '';
+}
+
+function removeRowFromStorage(rowIndex) {
+    const colCount = 2;
+    for (let col = 0; col < colCount; col++) {
+        const key = `cell-${rowIndex}-${col}`;
+        localStorage.removeItem(key); 
+    }
+    updateRowIndices();
+    localStorage.setItem('savedRowCount', savedRowCount - 1); 
+}
 
 const addRowButton = document.createElement('button');
 addRowButton.textContent = 'Add Row';
@@ -177,7 +172,12 @@ addRowButton.style.border = 'none';
 addRowButton.style.cursor = 'pointer';
 addRowButton.style.borderRadius = '5px';
 addRowButton.style.padding = '5px 10px';
-addRowButton.onclick = () => createRow(2, container.children.length);
+addRowButton.onclick = () => {
+createRow(2, savedRowCount);
+savedRowCount++;
+localStorage.setItem('savedRowCount', savedRowCount);
+createPermanentChecklist(); // Update headers after adding row
+};
 const grid1 = document.querySelector('.grid-1');
 grid1.appendChild(addRowButton);
 
@@ -185,7 +185,9 @@ const currentWeek = getCurrentWeekRange();
 
 if (currentWeek !== lastWeek) {
     Object.keys(localStorage).forEach(key => {
-        if (key !== 'lastWeek') localStorage.removeItem(key); // **Clearing out old week data**
+        if (key.startsWith('weekly-') && !key.includes(currentWeek)) {
+            localStorage.removeItem(key);
+        }
     });
     localStorage.setItem('lastWeek', currentWeek);
 }
@@ -199,7 +201,16 @@ if (savedFocus) {
 
 function createPermanentChecklist() {
     const habitTracker = document.querySelector('.habit-tracker');
-    const habitTrackerHead = habitTracker.querySelector('.header');
+    if (!habitTracker) return;
+
+    let habitTrackerHead = habitTracker.querySelector('.header');
+    
+    // Create the header if it doesn't exist
+    if (!habitTrackerHead) {
+        habitTrackerHead = document.createElement('div');
+        habitTrackerHead.classList.add('header');
+        habitTracker.appendChild(habitTrackerHead);
+    }
 
     habitTrackerHead.innerHTML = 'Daily Habit Tracker';
     habitTrackerHead.style.fontSize = '18px';
@@ -221,12 +232,7 @@ function createPermanentChecklist() {
     dayHead.style.textAlign = 'center';
     headChecklist.appendChild(dayHead);
 
-    if (document.querySelectorAll('.area-input').length === 0) {
-        createRow();
-    }
-
     const areaInputs = document.querySelectorAll('.area-input');
-
     areaInputs.forEach(input => {
         const header = document.createElement('div');
         header.innerText = input.innerText || 'New Area';
@@ -240,8 +246,4 @@ function createPermanentChecklist() {
 
 createPermanentChecklist();
 
-localStorage.setItem(`habitTracker-${index}`, header.innerText);
-
-createRow();
-saveCellValue(0, 0, '');
-saveCellValue(0, 1, '');
+localStorage.setItem('habitTrackerHeader', habitTrackerHead.innerText);
