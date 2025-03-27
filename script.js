@@ -217,41 +217,51 @@ function createPermanentChecklist() {
     habitTrackerHead.style.fontSize = '18px';
     habitTrackerHead.style.fontWeight = 'bold';
 
+    localStorage.setItem('habitTrackerHeader', habitTrackerHead.innerText);
+
     const existingChecklist = habitTracker.querySelector('.headChecklist');
     if (existingChecklist) existingChecklist.remove();
+
+    const areaInputs = document.querySelectorAll('.area-input');
 
     const headChecklist = document.createElement('div');
     headChecklist.classList.add('headChecklist');
     headChecklist.style.backgroundColor = '#f0f0f0';
     headChecklist.style.fontWeight = 'bold';
     headChecklist.style.display = 'grid';
-    headChecklist.style.gridTemplateColumns = '20% repeat(' + areaInputs.length + ', auto)';  // causing error
-    headChecklist.style.gridTemplateRows = 'repeat(1, 1fr)';  
+    headChecklist.style.gridTemplateColumns = `minmax(100px, 20%) repeat(${areaInputs.length}, 1fr)`;
+    headChecklist.style.gridTemplateRows = 'repeat(8, auto)';  
 
     const dayHead = document.createElement('div');
     dayHead.innerText = 'Day';
     dayHead.style.border = '1px solid lightgrey';
     dayHead.style.padding = '10px';
     dayHead.style.textAlign = 'center';
+    dayHead.style.gridRow = '1';
+    dayHead.style.gridColumn = '1';
     headChecklist.appendChild(dayHead);
 
-    const daysArray = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
-    daysArray.forEach(day => {
+    const daysArray = 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
+    daysArray.forEach((day, rowIndex) => {
         const dayCell = document.createElement('div');
         dayCell.innerText = day;
         dayCell.style.padding = '10px';
         dayCell.style.textAlign = 'center';
         dayCell.style.border = '1px solid lightgrey';
+        dayCell.style.gridColumn = '1';
+        dayCell.style.gridRow = `${rowIndex + 2}`; // Start below headers
+        dayCell.style.gridColumn = '1';
         headChecklist.appendChild(dayCell);
 });
 
-    const areaInputs = document.querySelectorAll('.area-input');
-    areaInputs.forEach(input => {
+    areaInputs.forEach((input, index) => {
         const header = document.createElement('div');
         header.innerText = input.innerText || 'New Area';
         header.style.padding = '10px';
         header.style.textAlign = 'center';
         header.style.border = '1px solid lightgrey';
+        header.style.gridRow = '1'; // Make sure it's on the first row
+        header.style.gridColumn = `${index + 2}`; 
         headChecklist.appendChild(header);
     });
 
@@ -259,5 +269,3 @@ function createPermanentChecklist() {
 }
 
 createPermanentChecklist();
-
-localStorage.setItem('habitTrackerHeader', habitTrackerHead.innerText);
