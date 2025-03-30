@@ -265,6 +265,35 @@ function createPermanentChecklist() {
         headChecklist.appendChild(header);
     });
 
+    areaInputs.forEach((input, index) => {
+        // Loop through days and create checkboxes for each areaInput
+        daysArray.forEach((day, rowIndex) => {
+            const checkboxCell = document.createElement('div');
+            checkboxCell.style.padding = '10px';
+            checkboxCell.style.textAlign = 'center';
+            checkboxCell.style.border = '1px solid lightgrey';
+            checkboxCell.style.gridRow = `${rowIndex + 2}`;
+            checkboxCell.style.gridColumn = `${index + 2}`;
+
+            // Create a checkbox input
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('habit-checkbox');
+            checkbox.dataset.area = input.innerText || 'New Area'; // Add data attribute to identify area
+            checkbox.dataset.day = day; // Add data attribute for the day
+
+            // Add event listener to toggle checked state
+            checkbox.addEventListener('change', (event) => {
+                // Optionally, store state in localStorage if needed
+                console.log(`Checkbox for ${event.target.dataset.day} in ${event.target.dataset.area} was ${event.target.checked ? 'checked' : 'unchecked'}`);
+            });
+
+            // Append checkbox to the cell
+            checkboxCell.appendChild(checkbox);
+            headChecklist.appendChild(checkboxCell);
+        });
+    });
+
     habitTracker.appendChild(headChecklist);
 }
 
