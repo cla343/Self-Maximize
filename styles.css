@@ -25,3 +25,51 @@
     font-weight: bold;
     font-size: 18px;
 }
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.dark-mode-toggle {
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    background: #ccc;
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.3s;
+}
+
+.dark-mode-toggle::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.dark-mode-toggle:checked {
+    background: black;
+}
+
+.dark-mode {
+    background-color: black;
+    color: white;
+}
+
+.dark-mode-toggle:checked::before {
+    transform: translateX(20px);
+}
+
+.area-header, .goal-header {
+    padding: 10px;
+    color: white;
+    transition: background-color 0.3s ease;
+}

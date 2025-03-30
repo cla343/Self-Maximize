@@ -27,12 +27,14 @@ const notesHeader = notes.querySelector('.header');
 notesHeader.innerHTML = '<span>Notes & Adjustments for the Week</span> <div class="notes-input" contenteditable="true"></div>';
 notesHeader.querySelector('span').style.fontSize = '18px';
 notesHeader.querySelector('span').style.fontWeight = 'bold';
+notesHeader.style.marginTop = '20px'; // Adjust the value as needed
 
 const notesInput = notesHeader.querySelector('.notes-input');
 notesInput.innerText = localStorage.getItem('weeklyNotes') || '';
 notesInput.addEventListener('input', () => {
     localStorage.setItem('weeklyNotes', notesInput.innerText);
 });
+notesInput.style.marginTop = '30px'; // Adjust the value as needed
 
 const container = document.createElement('div');
 container.classList.add('grid');
@@ -214,6 +216,8 @@ function createPermanentChecklist() {
 
     //Style the header
     habitTrackerHead.innerHTML = 'Daily Habit Tracker';
+    habitTrackerHead.style.marginTop = '30px'; // Adjust the value as needed
+    habitTrackerHead.style.marginBottom = '20px'; // Adjust the value as needed
     habitTrackerHead.style.fontSize = '18px';
     habitTrackerHead.style.fontWeight = 'bold';
 
@@ -295,10 +299,85 @@ function createPermanentChecklist() {
             // Append checkbox to the cell
             checkboxCell.appendChild(checkbox);
             headChecklist.appendChild(checkboxCell);
+
         });
     });
 
     habitTracker.appendChild(headChecklist);
+
+    const checkboxes = document.querySelectorAll('.habit-checkbox');
+    checkboxes.forEach(checkbox => {
+        const area = checkbox.dataset.area;
+        const day = checkbox.dataset.day;
+        const key = `weekly-${area}-${day}`;
+        const checked = localStorage.getItem(key) === 'true';
+        checkbox.checked = checked;
+
+        checkbox.addEventListener('change', () => {
+        localStorage.setItem(key, checkbox.checked);
+});
+    });
 }
 
 createPermanentChecklist();
+
+const weekReview = document.querySelector('.recap');
+weekReview.innerHTML = '<span>End of Week Review</span> <div class="recap-input" contenteditable="true"></div>';
+const recapInput = weekReview.querySelector('.recap-input');
+recapInput.innerText = localStorage.getItem('weekRecap') || '';
+recapInput.addEventListener('input', () => {
+    localStorage.setItem('weekRecap', recapInput.innerText);
+});
+weekReview.style.marginTop = '30px'; // Adjust the value as needed
+weekReview.querySelector('span').style.fontSize = '18px';
+weekReview.querySelector('span').style.fontWeight = 'bold'; 
+recapInput.style.marginTop = '30px'; // Adjust the value as needed
+
+document.addEventListener('DOMContentLoaded', () => {
+    const darkModeToggle = document.querySelector('.dark-mode-toggle');
+    
+    if (darkModeToggle) {
+        const savedMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = savedMode;
+        document.body.classList.toggle('dark-mode', savedMode);
+
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode', darkModeToggle.checked);
+            localStorage.setItem('darkMode', darkModeToggle.checked);
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.querySelector('.dark-mode-toggle');
+    
+    toggle.addEventListener('change', () => {
+        document.body.classList.toggle('dark-mode', toggle.checked);
+        localStorage.setItem('darkMode', toggle.checked);
+    });
+
+    // Load saved preference
+    if (localStorage.getItem('darkMode') === 'true') {
+        toggle.checked = true;
+        document.body.classList.add('dark-mode');
+    }
+});
+
+function applyDarkModeStyles() {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches || 
+                       document.body.classList.contains('dark');
+
+    document.querySelectorAll('.grid-row').forEach(header => {
+        header.style.backgroundColor = isDarkMode ? 'black' : '#f0f0f0', 'important'; // Black in dark mode, dark gray in light mode
+    });
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.style.accentColor = isDarkMode ? '#555' : '#ccc'; // Darker checkbox in dark mode
+    });
+}
+
+// Run on load
+applyDarkModeStyles();
+
+// Listen for changes in dark mode
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyDarkModeStyles);
