@@ -263,6 +263,10 @@ function createPermanentChecklist() {
         header.style.gridRow = '1'; // Make sure it's on the first row
         header.style.gridColumn = `${index + 2}`; 
         headChecklist.appendChild(header);
+
+        input.addEventListener('input', () => {
+            header.innerText = input.innerText || 'New Area'; // Update the header text
+        });
     });
 
     areaInputs.forEach((input, index) => {
