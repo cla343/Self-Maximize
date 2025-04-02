@@ -47,6 +47,7 @@ function createPermanentRow() {
     row.style.gridTemplateColumns = '.5fr 1fr';
     row.style.fontWeight = 'bold';
     row.style.backgroundColor = '#f0f0f0';
+    row.style.border = '1px solid lightgrey';
 
     const areaCell = document.createElement('div');
     areaCell.innerText = 'Area';
@@ -333,51 +334,54 @@ weekReview.querySelector('span').style.fontSize = '18px';
 weekReview.querySelector('span').style.fontWeight = 'bold'; 
 recapInput.style.marginTop = '30px'; // Adjust the value as needed
 
+
 document.addEventListener('DOMContentLoaded', () => {
     const darkModeToggle = document.querySelector('.dark-mode-toggle');
-    
+
     if (darkModeToggle) {
         const savedMode = localStorage.getItem('darkMode') === 'true';
         darkModeToggle.checked = savedMode;
         document.body.classList.toggle('dark-mode', savedMode);
 
         darkModeToggle.addEventListener('change', () => {
-            document.body.classList.toggle('dark-mode', darkModeToggle.checked);
-            localStorage.setItem('darkMode', darkModeToggle.checked);
-        });
+            const isDarkMode = darkModeToggle.checked;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            localStorage.setItem('darkMode', isDarkMode);
+            });
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.querySelector('.dark-mode-toggle');
-    
-    toggle.addEventListener('change', () => {
-        document.body.classList.toggle('dark-mode', toggle.checked);
-        localStorage.setItem('darkMode', toggle.checked);
+function applyDarkModeStyles(isDarkMode) {
+    document.querySelectorAll('.grid-row').forEach(row => {
+        row.style.backgroundColor = isDarkMode ? 'black' : '#f0f0f0';
     });
 
-    // Load saved preference
-    if (localStorage.getItem('darkMode') === 'true') {
-        toggle.checked = true;
-        document.body.classList.add('dark-mode');
-    }
-});
+    document.querySelectorAll('.grid-header').forEach(header => {
+        header.style.backgroundColor = isDarkMode ? '#333' : '#f0f0f0';
+        header.style.color = isDarkMode ? '#fff' : '#000';
+    });
 
-function applyDarkModeStyles() {
-    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches || 
-                       document.body.classList.contains('dark');
-
-    document.querySelectorAll('.grid-row').forEach(header => {
-        header.style.backgroundColor = isDarkMode ? 'black' : '#f0f0f0', 'important'; // Black in dark mode, dark gray in light mode
+    document.querySelectorAll('.grid-cell').forEach(cell => {
+        cell.style.backgroundColor = isDarkMode ? '#444' : '#fff';
+        cell.style.color = isDarkMode ? '#ddd' : '#000';
     });
 
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.style.accentColor = isDarkMode ? '#555' : '#ccc'; // Darker checkbox in dark mode
+        checkbox.style.accentColor = isDarkMode ? '#555' : '#ccc';
     });
+
+    const recapInput = document.querySelector('.recap-input');
+    if (recapInput) {
+        recapInput.style.backgroundColor = isDarkMode ? '#555' : '#fff';
+        recapInput.style.color = isDarkMode ? '#fff' : '#000';
+    }
 }
 
-// Run on load
-applyDarkModeStyles();
+document.body.style.transition = 'background-color 0.3s, color 0.3s';
 
-// Listen for changes in dark mode
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyDarkModeStyles);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const prefersDark = e.matches;
+    document.body.classList.toggle('dark-mode', prefersDark);
+    localStorage.setItem('darkMode', prefersDark);
+    applyDarkModeStyles(prefersDark);
+});

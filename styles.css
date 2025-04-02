@@ -73,3 +73,16 @@
     color: white;
     transition: background-color 0.3s ease;
 }
+
+.dark-mode .header {
+    background-color: black !important;
+}
+
+.dark-mode .grid-1, 
+.dark-mode .grid-week,
+.dark-mode .grid-row,
+.dark-mode .headChecklist {
+    background-color: black !important;
+}
+
+
