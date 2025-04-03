@@ -1,6 +1,6 @@
 function getCurrentWeekRange(date = new Date()) {
     let dayIndex = date.getDay();
-    let daysToMonday = dayIndex === 0 ? 6 : dayIndex - 1;
+    let daysToMonday = dayIndex === 1 ? 0 : (dayIndex === 0 ? 6 : dayIndex - 1);
     let startOfWeek = new Date(date);
     startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
     let endOfWeek = new Date(startOfWeek);
@@ -36,7 +36,8 @@ weekToggleNext.textContent = '>';
 
 function getStartDateFromWeekText(weekTextContent) {
     const weekStartDate = weekTextContent.split(' - ')[0];
-    return new Date(weekStartDate);
+    const parts = weekStartDate.split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
 }
 
 weekTogglePrevious.onclick = () => {
