@@ -1,8 +1,7 @@
-function getCurrentWeekRange() {
-    let today = new Date();
-    let dayIndex = today.getDay();
+function getCurrentWeekRange(date = new Date()) {
+    let dayIndex = date.getDay();
     let daysToMonday = dayIndex === 0 ? 6 : dayIndex - 1;
-    let startOfWeek = new Date(today);
+    let startOfWeek = new Date(date);
     startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
     let endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
@@ -11,9 +10,55 @@ function getCurrentWeekRange() {
     return `${startStr} - ${endStr}`;
 }
 
-const lastWeek = localStorage.getItem('lastWeek');
+const lastWeek = localStorage.getItem('lastWeek') || getCurrentWeekRange();
 const week = document.querySelector('.week');
-week.textContent = getCurrentWeekRange();
+const weekContainer = document.createElement('div');
+weekContainer.style.display = 'flex';
+weekContainer.style.justifyContent = 'center';
+weekContainer.style.alignItems = 'center';
+const weekText = document.createElement('span');
+weekText.textContent = lastWeek;
+weekText.style.margin = '0 10px';
+weekText.style.fontWeight = 'bold';
+const weekTogglePrevious = document.createElement('button');
+weekTogglePrevious.textContent = '<';
+const weekToggleNext = document.createElement('button');
+weekToggleNext.textContent = '>';
+[weekTogglePrevious, weekToggleNext].forEach(button => {
+    button.style.fontWeight = 'bold';
+    button.style.margin = '0 10px';
+    button.style.backgroundColor = 'lightgrey';
+    button.style.border = 'none';
+    button.style.cursor = 'pointer';
+    button.style.borderRadius = '5px';
+    button.style.padding = '5px 10px';
+});
+
+function getStartDateFromWeekText(weekTextContent) {
+    const weekStartDate = weekTextContent.split(' - ')[0];
+    return new Date(weekStartDate);
+}
+
+weekTogglePrevious.onclick = () => {
+    let currentStartDate = getStartDateFromWeekText(weekText.textContent);
+    currentStartDate.setDate(currentStartDate.getDate() - 7);
+    let previousWeek = getCurrentWeekRange(currentStartDate);
+    weekText.textContent = previousWeek;
+    localStorage.setItem('lastWeek', previousWeek);
+};
+
+weekToggleNext.onclick = () => {
+    let currentStartDate = getStartDateFromWeekText(weekText.textContent);
+    currentStartDate.setDate(currentStartDate.getDate() + 7);
+    let nextWeek = getCurrentWeekRange(currentStartDate);
+    weekText.textContent = nextWeek;        
+    localStorage.setItem('lastWeek', nextWeek);
+};
+
+weekContainer.appendChild(weekTogglePrevious);
+weekContainer.appendChild(weekText);
+weekContainer.appendChild(weekToggleNext);
+week.appendChild(weekContainer);
 
 const focus = document.querySelector('.primary-focus');
 focus.innerHTML = '<span>Primary Focus:</span> <div class="focus-input" contenteditable="true"></div>';
@@ -21,11 +66,12 @@ const input = document.querySelector('.focus-input');
 input.addEventListener('input', () => {
     localStorage.setItem('primaryFocus', input.innerText);
 });
+focus.style.justifyContent = 'center';
 
 const notes = document.querySelector('.notes');
 const notesHeader = notes.querySelector('.header');
 notesHeader.innerHTML = '<span>Notes & Adjustments for the Week</span> <div class="notes-input" contenteditable="true"></div>';
-notesHeader.querySelector('span').style.fontSize = '18px';
+notesHeader.querySelector('span').style.fontSize = '20px';
 notesHeader.querySelector('span').style.fontWeight = 'bold';
 notesHeader.style.marginTop = '20px'; // Adjust the value as needed
 
@@ -219,7 +265,7 @@ function createPermanentChecklist() {
     habitTrackerHead.innerHTML = 'Daily Habit Tracker';
     habitTrackerHead.style.marginTop = '30px'; // Adjust the value as needed
     habitTrackerHead.style.marginBottom = '20px'; // Adjust the value as needed
-    habitTrackerHead.style.fontSize = '18px';
+    habitTrackerHead.style.fontSize = '20px';
     habitTrackerHead.style.fontWeight = 'bold';
 
     localStorage.setItem('habitTrackerHeader', habitTrackerHead.innerText);
@@ -330,7 +376,7 @@ recapInput.addEventListener('input', () => {
     localStorage.setItem('weekRecap', recapInput.innerText);
 });
 weekReview.style.marginTop = '30px'; // Adjust the value as needed
-weekReview.querySelector('span').style.fontSize = '18px';
+weekReview.querySelector('span').style.fontSize = '20px';
 weekReview.querySelector('span').style.fontWeight = 'bold'; 
 recapInput.style.marginTop = '30px'; // Adjust the value as needed
 
@@ -385,3 +431,8 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
     localStorage.setItem('darkMode', prefersDark);
     applyDarkModeStyles(prefersDark);
 });
+
+
+/* function toggleWeeks () {
+
+} */

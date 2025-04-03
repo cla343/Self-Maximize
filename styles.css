@@ -13,11 +13,16 @@
 .header > .primary-focus {
     display: flex;
     gap: 10px;
+    padding-bottom: 20px;
+}
+
+.header > .week {
+    padding-bottom: 30px;
+    font-size: 24px;
 }
 
 .header > .primary-focus .focus-input {
     display: inline-block;
-    min-width: 1200px;
     padding-top: 2px;
 }
 
