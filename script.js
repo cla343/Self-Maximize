@@ -263,8 +263,8 @@ function createPermanentChecklist() {
 
     //Style the header
     habitTrackerHead.innerHTML = 'Daily Habit Tracker';
-    habitTrackerHead.style.marginTop = '30px'; // Adjust the value as needed
-    habitTrackerHead.style.marginBottom = '20px'; // Adjust the value as needed
+    habitTrackerHead.style.marginTop = '30px'; 
+    habitTrackerHead.style.marginBottom = '20px'; 
     habitTrackerHead.style.fontSize = '20px';
     habitTrackerHead.style.fontWeight = 'bold';
 
@@ -337,10 +337,12 @@ function createPermanentChecklist() {
             checkbox.dataset.area = input.innerText || 'New Area'; // Add data attribute to identify area
             checkbox.dataset.day = day; // Add data attribute for the day
 
-            // Add event listener to toggle checked state
-            checkbox.addEventListener('change', (event) => {
-                // Optionally, store state in localStorage if needed
-                console.log(`Checkbox for ${event.target.dataset.day} in ${event.target.dataset.area} was ${event.target.checked ? 'checked' : 'unchecked'}`);
+            const key = `weekly-${checkbox.dataset.area}-${checkbox.dataset.day}`;
+            const checked = localStorage.getItem(key) === 'true';
+            checkbox.checked = checked;
+
+           checkbox.addEventListener('change', (event) => {
+                localStorage.setItem(key, event.target.checked);
             });
 
             // Append checkbox to the cell
@@ -351,19 +353,6 @@ function createPermanentChecklist() {
     });
 
     habitTracker.appendChild(headChecklist);
-
-    const checkboxes = document.querySelectorAll('.habit-checkbox');
-    checkboxes.forEach(checkbox => {
-        const area = checkbox.dataset.area;
-        const day = checkbox.dataset.day;
-        const key = `weekly-${area}-${day}`;
-        const checked = localStorage.getItem(key) === 'true';
-        checkbox.checked = checked;
-
-        checkbox.addEventListener('change', () => {
-        localStorage.setItem(key, checkbox.checked);
-});
-    });
 }
 
 createPermanentChecklist();
@@ -431,8 +420,3 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
     localStorage.setItem('darkMode', prefersDark);
     applyDarkModeStyles(prefersDark);
 });
-
-
-/* function toggleWeeks () {
-
-} */
