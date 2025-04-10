@@ -46,6 +46,7 @@ weekTogglePrevious.onclick = () => {
     let previousWeek = getCurrentWeekRange(currentStartDate);
     weekText.textContent = previousWeek;
     localStorage.setItem('lastWeek', previousWeek);
+    loadWeekData(previousWeek); 
 };
 
 weekToggleNext.onclick = () => {
@@ -54,7 +55,22 @@ weekToggleNext.onclick = () => {
     let nextWeek = getCurrentWeekRange(currentStartDate);
     weekText.textContent = nextWeek;        
     localStorage.setItem('lastWeek', nextWeek);
+    loadWeekData(nextWeek);
 };
+
+function loadWeekData(weekRange) {
+    input.innerText = localStorage.getItem(`primaryFocus-${weekRange}`) || '';
+    notesInput.innerText = localStorage.getItem('weeklyNotes') || '';
+
+    container.innerHTML = '';
+    createPermanentRow();
+    const rowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`) || '0', 10);
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+        createRow(2, rowIndex, weekRange);
+    }
+
+    savedRowCount = rowCount;
+}
 
 weekContainer.appendChild(weekTogglePrevious);
 weekContainer.appendChild(weekText);
@@ -65,7 +81,8 @@ const focus = document.querySelector('.primary-focus');
 focus.innerHTML = '<span>Primary Focus:</span> <div class="focus-input" contenteditable="true"></div>';
 const input = document.querySelector('.focus-input');
 input.addEventListener('input', () => {
-    localStorage.setItem('primaryFocus', input.innerText);
+    const currentWeek = weekText.textContent;
+    localStorage.setItem(`primaryFocus-${currentWeek}`, input.innerText);
 });
 focus.style.justifyContent = 'center';
 
@@ -113,7 +130,7 @@ function createPermanentRow() {
 
 createPermanentRow();
 
-function createRow(columns = 2, rowIndex = savedRowCount) {
+    function createRow(columns = 2, rowIndex = savedRowCount, weekRange = getCurrentWeekRange()) {
     const row = document.createElement('div');
     row.classList.add('grid-row');
     row.style.display = 'grid';
@@ -194,13 +211,13 @@ function loadSavedRows() {
 
 loadSavedRows();
 
-function saveCellValue(rowIndex, colIndex, value) {
-    const key = `cell-${rowIndex}-${colIndex}`;
+function saveCellValue(rowIndex, colIndex, value, weekRange = getCurrentWeekRange()) {
+    const key = `cell-${rowIndex}-${colIndex}-${weekRange}`;
     localStorage.setItem(key, value);
 }
 
-function getSavedCellValue(row, col) {
-    const key = `cell-${row}-${col}`;
+function getSavedCellValue(row, col, weekRange = getCurrentWeekRange()) {
+    const key = `cell-${row}-${col}-${weekRange}`;
     return localStorage.getItem(key) || '';
 }
 
@@ -223,10 +240,11 @@ addRowButton.style.cursor = 'pointer';
 addRowButton.style.borderRadius = '5px';
 addRowButton.style.padding = '5px 10px';
 addRowButton.onclick = () => {
-createRow(2, savedRowCount);
-savedRowCount++;
-localStorage.setItem('savedRowCount', savedRowCount);
-createPermanentChecklist(); // Update headers after adding row
+    const weekRange = weekText.textContent;
+    createRow(2, savedRowCount, weekRange);
+    savedRowCount++;
+    localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
+    createPermanentChecklist();
 };
 const grid1 = document.querySelector('.grid-1');
 grid1.appendChild(addRowButton);
@@ -338,7 +356,12 @@ function createPermanentChecklist() {
             checkbox.dataset.area = input.innerText || 'New Area'; // Add data attribute to identify area
             checkbox.dataset.day = day; // Add data attribute for the day
 
-            const key = `weekly-${checkbox.dataset.area}-${checkbox.dataset.day}`;
+            const date = new Date();
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
+            const weekNumber = Math.ceil((days + 1) / 7);
+
+            const key = `weekly-${weekNumber}-${checkbox.dataset.area}-${checkbox.dataset.day}`;
             const checked = localStorage.getItem(key) === 'true';
             checkbox.checked = checked;
 
@@ -421,3 +444,5 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
     localStorage.setItem('darkMode', prefersDark);
     applyDarkModeStyles(prefersDark);
 });
+
+loadWeekData(lastWeek);
