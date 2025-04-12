@@ -70,6 +70,7 @@ function loadWeekData(weekRange) {
     }
 
     savedRowCount = rowCount;
+    createPermanentChecklist();
 }
 
 weekContainer.appendChild(weekTogglePrevious);
@@ -106,7 +107,7 @@ document.querySelector('.grid-1').appendChild(container);
 
 function createPermanentRow() {
     const row = document.createElement('div');
-    row.classList.add('grid-row');
+    row.classList.add('grid-row', 'grid-header');
     row.style.display = 'grid';
     row.style.gridTemplateColumns = '.5fr 1fr';
     row.style.fontWeight = 'bold';
@@ -361,7 +362,7 @@ function createPermanentChecklist() {
             const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
             const weekNumber = Math.ceil((days + 1) / 7);
 
-            const key = `weekly-${weekNumber}-${checkbox.dataset.area}-${checkbox.dataset.day}`;
+            const key = `weekly-${weekContainer}-${checkbox.dataset.area}-${checkbox.dataset.day}`;
             const checked = localStorage.getItem(key) === 'true';
             checkbox.checked = checked;
 
@@ -377,6 +378,7 @@ function createPermanentChecklist() {
     });
 
     habitTracker.appendChild(headChecklist);
+    applyDarkModeStyles(document.body.classList.contains('dark-mode'));
 }
 
 createPermanentChecklist();
@@ -402,17 +404,20 @@ document.addEventListener('DOMContentLoaded', () => {
         darkModeToggle.checked = savedMode;
         document.body.classList.toggle('dark-mode', savedMode);
 
+        applyDarkModeStyles(savedMode);
+
         darkModeToggle.addEventListener('change', () => {
             const isDarkMode = darkModeToggle.checked;
             document.body.classList.toggle('dark-mode', isDarkMode);
             localStorage.setItem('darkMode', isDarkMode);
+            applyDarkModeStyles(isDarkMode);
             });
     }
 });
 
 function applyDarkModeStyles(isDarkMode) {
     document.querySelectorAll('.grid-row').forEach(row => {
-        row.style.backgroundColor = isDarkMode ? 'black' : '#f0f0f0';
+        row.style.backgroundColor = isDarkMode ? 'black' : '#fff';
     });
 
     document.querySelectorAll('.grid-header').forEach(header => {
@@ -426,13 +431,19 @@ function applyDarkModeStyles(isDarkMode) {
     });
 
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.style.accentColor = isDarkMode ? '#555' : '#ccc';
+        checkbox.style.accentColor = isDarkMode ? '#555' : '##89CFF0';
     });
 
     const recapInput = document.querySelector('.recap-input');
     if (recapInput) {
-        recapInput.style.backgroundColor = isDarkMode ? '#555' : '#fff';
+        recapInput.style.backgroundColor = isDarkMode ? 'black' : 'white';
         recapInput.style.color = isDarkMode ? '#fff' : '#000';
+    }
+
+    const weekReview = document.querySelector('.recap');
+    if (weekReview) {
+        weekReview.style.backgroundColor = isDarkMode ? 'black' : 'white';  // Adjust for dark mode
+        weekReview.style.color = isDarkMode ? '#fff' : '#000';  // Adjust for dark mode text color
     }
 }
 
@@ -444,5 +455,8 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
     localStorage.setItem('darkMode', prefersDark);
     applyDarkModeStyles(prefersDark);
 });
+
+const savedMode = localStorage.getItem('darkMode') === 'true';
+applyDarkModeStyles(savedMode); // Apply saved mode on page load
 
 loadWeekData(lastWeek);
