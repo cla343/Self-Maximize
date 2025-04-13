@@ -143,6 +143,7 @@ createPermanentRow();
         editDiv.contentEditable = 'true';
         editDiv.classList.add(colIndex === 0 ? 'area-input' : 'goal-input');
         editDiv.innerText = getSavedCellValue(rowIndex, colIndex);
+        editDiv.dataset.key = `cell-${rowIndex}-${colIndex}-${weekRange}`;
         editDiv.addEventListener('input', () => saveCellValue(rowIndex, colIndex, editDiv.innerText));
         cell.appendChild(editDiv);
         cell.style.border = '1px solid lightgrey';
@@ -162,8 +163,10 @@ createPermanentRow();
     deleteButton.onclick = () => {
         const rowIndex = Array.from(container.children).indexOf(row); 
         container.removeChild(row);
-        removeRowFromStorage(rowIndex);
+        removeRowFromStorage(rowIndex, getCurrentWeekRange());
         updateRowIndices();
+        savedRowCount--;
+        localStorage.setItem(`savedRowCount-${getCurrentWeekRange()}`, savedRowCount);
         createPermanentChecklist(); 
     };
 
@@ -177,13 +180,13 @@ createPermanentRow();
     container.appendChild(row);
 }
 
-let savedRowCount = parseInt(localStorage.getItem('savedRowCount') || '0', 10);
-
-localStorage.setItem('savedRowCount', savedRowCount);
+let savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${getCurrentWeekRange()}`) || '0', 10);
+localStorage.setItem(`savedRowCount-${getCurrentWeekRange()}`, savedRowCount);
 
 function updateRowIndices() {
     const rows = container.children;
     const weekRange = getCurrentWeekRange(); 
+
     Array.from(rows).forEach((row, rowIndex) => {
         if (rowIndex === 0) return;
         const cells = row.children;
@@ -202,7 +205,8 @@ function updateRowIndices() {
 }
 
 function loadSavedRows() {
-    const savedRowCount = parseInt(localStorage.getItem('savedRowCount') || '0', 10);
+    const weekRange = getCurrentWeekRange();
+    const savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`) || '0', 10);
     container.innerHTML = '';
     createPermanentRow();
     for (let rowIndex = 0; rowIndex < savedRowCount; rowIndex++) {
@@ -222,12 +226,13 @@ function getSavedCellValue(row, col, weekRange = getCurrentWeekRange()) {
     return localStorage.getItem(key) || '';
 }
 
-function removeRowFromStorage(rowIndex) {
+function removeRowFromStorage(rowIndex, weekRange = getCurrentWeekRange()) {
     const colCount = 2;
     for (let col = 0; col < colCount; col++) {
-        const key = `cell-${rowIndex}-${col}`;
+        const key = `cell-${rowIndex}-${col}-${weekRange}`;
         localStorage.removeItem(key); 
     }
+
     updateRowIndices();
     localStorage.setItem('savedRowCount', savedRowCount - 1); 
 }
@@ -294,6 +299,10 @@ function createPermanentChecklist() {
     if (existingChecklist) existingChecklist.remove();
 
     const areaInputs = document.querySelectorAll('.area-input');
+    areaInputs.forEach((input, index) => {
+        const savedName = localStorage.getItem(`areaName-${index}`);
+        if (savedName) input.innerText = savedName;
+    });
 
     const headChecklist = document.createElement('div');
     headChecklist.classList.add('headChecklist');
@@ -336,7 +345,9 @@ function createPermanentChecklist() {
         headChecklist.appendChild(header);
 
         input.addEventListener('input', () => {
-            header.innerText = input.innerText || 'New Area'; // Update the header text
+            const areaIndex = index;
+            localStorage.setItem(`areaName-${areaIndex}`, input.innerText);
+            header.innerText = input.innerText || 'New Area';
         });
     });
 
@@ -362,7 +373,7 @@ function createPermanentChecklist() {
             const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
             const weekNumber = Math.ceil((days + 1) / 7);
 
-            const key = `weekly-${weekContainer}-${checkbox.dataset.area}-${checkbox.dataset.day}`;
+            const key = `weekly-${currentWeek}-${checkbox.dataset.area}-${checkbox.dataset.day}`;
             const checked = localStorage.getItem(key) === 'true';
             checkbox.checked = checked;
 
@@ -430,9 +441,9 @@ function applyDarkModeStyles(isDarkMode) {
         cell.style.color = isDarkMode ? '#ddd' : '#000';
     });
 
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    /* document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.style.accentColor = isDarkMode ? '#555' : '##89CFF0';
-    });
+    }); */
 
     const recapInput = document.querySelector('.recap-input');
     if (recapInput) {
