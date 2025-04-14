@@ -66,11 +66,15 @@ function loadWeekData(weekRange) {
     createPermanentRow();
     const rowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`) || '0', 10);
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-        createRow(2, rowIndex, weekRange);
-    }
+        const hasArea = localStorage.getItem(`cell-${rowIndex}-0-${weekRange}`) !== null;
+        const hasGoal = localStorage.getItem(`cell-${rowIndex}-1-${weekRange}`) !== null;
+        if (hasArea || hasGoal) {
+            createRow(2, rowIndex, weekRange);
+        }
+}
 
-    savedRowCount = rowCount;
-    createPermanentChecklist();
+savedRowCount = rowCount;
+createPermanentChecklist();
 }
 
 weekContainer.appendChild(weekTogglePrevious);
@@ -163,12 +167,17 @@ createPermanentRow();
     deleteButton.onclick = () => {
         const rowIndex = Array.from(container.children).indexOf(row); 
         container.removeChild(row);
-        removeRowFromStorage(rowIndex, getCurrentWeekRange());
-        updateRowIndices();
-        savedRowCount--;
-        localStorage.setItem(`savedRowCount-${getCurrentWeekRange()}`, savedRowCount);
-        createPermanentChecklist(); 
-    };
+       rows.forEach((row, index) => {
+        const area = row.querySelector('.area-input')?.innerText || '';
+        const goal = row.querySelector('.goal-input')?.innerText || '';
+
+        localStorage.setItem(`cell-${index}-0-${weekRange}`, area);
+        localStorage.setItem(`cell-${index}-1-${weekRange}`, goal);
+    });
+
+    savedRowCount = rows.length - 1;
+    localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
+}
 
     const deleteCell = document.createElement('div');
     deleteCell.appendChild(deleteButton);
@@ -184,24 +193,20 @@ let savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${getCurrentWee
 localStorage.setItem(`savedRowCount-${getCurrentWeekRange()}`, savedRowCount);
 
 function updateRowIndices() {
-    const rows = container.children;
     const weekRange = getCurrentWeekRange(); 
+    const rows = container.querySelectorAll('.grid-row');
 
-    Array.from(rows).forEach((row, rowIndex) => {
-        if (rowIndex === 0) return;
-        const cells = row.children;
-        for (let colIndex = 0; colIndex < cells.length - 1; colIndex++) {
-            const oldKey = `cell-${rowIndex + 1}-${colIndex}-${getCurrentWeekRange()}`;
-            const newKey = `cell-${rowIndex}-${colIndex}-${weekRange}`;
-            const value = localStorage.getItem(oldKey);
-            if (value) {
-                localStorage.setItem(newKey, value);
-                localStorage.removeItem(oldKey);
-            }
-        }
+    rows.forEach((row, newIndex) => {
+        if (rowIndex === 0) return; // Skip permanent row
+        const area = row.querySelector('.area-input')?.innerText || '';
+        const goal = row.querySelector('.goal-input')?.innerText || '';
+        
+        localStorage.setItem(`cell-${newIndex}-0-${weekRange}`, area);
+        localStorage.setItem(`cell-${newIndex}-1-${weekRange}`, goal);
     });
-    savedRowCount = rows.length - 1;
-    localStorage.setItem('savedRowCount', savedRowCount);
+
+    savedRowCount = rows.length -1;
+    localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
 }
 
 function loadSavedRows() {
@@ -232,9 +237,6 @@ function removeRowFromStorage(rowIndex, weekRange = getCurrentWeekRange()) {
         const key = `cell-${rowIndex}-${col}-${weekRange}`;
         localStorage.removeItem(key); 
     }
-
-    updateRowIndices();
-    localStorage.setItem('savedRowCount', savedRowCount - 1); 
 }
 
 const addRowButton = document.createElement('button');
@@ -330,7 +332,6 @@ function createPermanentChecklist() {
         dayCell.style.border = '1px solid lightgrey';
         dayCell.style.gridColumn = '1';
         dayCell.style.gridRow = `${rowIndex + 2}`; // Start below headers
-        dayCell.style.gridColumn = '1';
         headChecklist.appendChild(dayCell);
 });
 
@@ -352,6 +353,7 @@ function createPermanentChecklist() {
     });
 
     areaInputs.forEach((input, index) => {
+        const areaName = input.innerText || `New Area ${index + 1}`;
         // Loop through days and create checkboxes for each areaInput
         daysArray.forEach((day, rowIndex) => {
             const checkboxCell = document.createElement('div');
@@ -365,21 +367,19 @@ function createPermanentChecklist() {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.classList.add('habit-checkbox');
-            checkbox.dataset.area = input.innerText || 'New Area'; // Add data attribute to identify area
+            checkbox.dataset.area = areaName;
             checkbox.dataset.day = day; // Add data attribute for the day
+            const key = `weekly-${currentWeek}-${areaName}-${day}`;
+            checkbox.checked = localStorage.getItem(key) === 'true';
+            checkbox.addEventListener('change', (event) => {
+                const isChecked = event.target.checked;
+                localStorage.setItem(key, isChecked);
+            });
 
             const date = new Date();
             const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
             const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
             const weekNumber = Math.ceil((days + 1) / 7);
-
-            const key = `weekly-${currentWeek}-${checkbox.dataset.area}-${checkbox.dataset.day}`;
-            const checked = localStorage.getItem(key) === 'true';
-            checkbox.checked = checked;
-
-           checkbox.addEventListener('change', (event) => {
-                localStorage.setItem(key, event.target.checked);
-            });
 
             // Append checkbox to the cell
             checkboxCell.appendChild(checkbox);
