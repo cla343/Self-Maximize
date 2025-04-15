@@ -60,7 +60,7 @@ weekToggleNext.onclick = () => {
 
 function loadWeekData(weekRange) {
     input.innerText = localStorage.getItem(`primaryFocus-${weekRange}`) || '';
-    notesInput.innerText = localStorage.getItem('weeklyNotes') || '';
+    notesInput.innerText = localStorage.getItem(`weeklyNotes-${weekRange}`) || '';
 
     container.innerHTML = '';
     createPermanentRow();
@@ -99,11 +99,12 @@ notesHeader.querySelector('span').style.fontWeight = 'bold';
 notesHeader.style.marginTop = '20px'; // Adjust the value as needed
 
 const notesInput = notesHeader.querySelector('.notes-input');
-notesInput.innerText = localStorage.getItem('weeklyNotes') || '';
+const currentWeekRange =  getCurrentWeekRange();
+notesInput.innerText = localStorage.getItem(`weeklyNotes-${currentWeekRange}`) || '';
 notesInput.addEventListener('input', () => {
-    localStorage.setItem('weeklyNotes', notesInput.innerText);
+    const weekRange = getCurrentWeekRange();
+    localStorage.setItem(`weeklyNotes-${weekRange}`, notesInput.innerText);
 });
-notesInput.style.marginTop = '30px'; // Adjust the value as needed
 
 const container = document.createElement('div');
 container.classList.add('grid');
@@ -394,18 +395,22 @@ function createPermanentChecklist() {
 
 createPermanentChecklist();
 
+document.addEventListener('DOMContentLoaded', () => {
 const weekReview = document.querySelector('.recap');
+if (!weekReview) return;
 weekReview.innerHTML = '<span>End of Week Review</span> <div class="recap-input" contenteditable="true"></div>';
 const recapInput = weekReview.querySelector('.recap-input');
-recapInput.innerText = localStorage.getItem('weekRecap') || '';
+const currentWeekRange = getCurrentWeekRange(); // ✅ Call the function
+recapInput.innerText = localStorage.getItem(`weekRecap-${currentWeekRange}`) || '';
 recapInput.addEventListener('input', () => {
-    localStorage.setItem('weekRecap', recapInput.innerText);
+    const weekRange = getCurrentWeekRange(); // Recalculate in case the week changed
+    localStorage.setItem(`weekRecap-${weekRange}`, recapInput.innerText);
 });
 weekReview.style.marginTop = '30px'; // Adjust the value as needed
 weekReview.querySelector('span').style.fontSize = '20px';
 weekReview.querySelector('span').style.fontWeight = 'bold'; 
 recapInput.style.marginTop = '30px'; // Adjust the value as needed
-
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const darkModeToggle = document.querySelector('.dark-mode-toggle');
