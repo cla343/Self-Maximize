@@ -90,4 +90,36 @@
     background-color: black !important;
 }
 
+.focus-input,
+.notes-input,
+.recap-input {
+    border: 2px solid transparent;
+    padding: 8px;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+    min-height: 40px;
+}
 
+.focus-input {
+    display: inline-block;
+    width: 300px;
+}
+
+/* Show border on hover */
+.focus-input:hover,
+.notes-input:hover,
+.recap-input:hover {
+    border-color: #aaa;
+}
+
+/* Show border when typing */
+.focus-input:focus,
+.notes-input:focus,
+.recap-input:focus {
+    border-color: #007bff; /* or whatever accent color you like */
+    outline: none; /* optional: removes blue default focus outline */
+}
+
+.habit-checkbox:hover {
+    cursor: pointer;
+}
