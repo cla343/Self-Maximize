@@ -61,6 +61,13 @@ weekToggleNext.onclick = () => {
 function loadWeekData(weekRange) {
     input.innerText = localStorage.getItem(`primaryFocus-${weekRange}`) || '';
     notesInput.innerText = localStorage.getItem(`weeklyNotes-${weekRange}`) || '';
+    const weekReview = document.querySelector('.recap');
+    if (weekReview) {
+        const recapInput = weekReview.querySelector('.recap-input');
+        if (recapInput) {
+            recapInput.innerText = localStorage.getItem(`weekRecap-${weekRange}`) || '';
+        }
+    }
 
     container.innerHTML = '';
     createPermanentRow();
