@@ -100,6 +100,13 @@
     min-height: 40px;
 }
 
+.area-input,
+.goal-input {
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+}
+
 .focus-input {
     display: inline-block;
     width: 300px;
@@ -108,14 +115,18 @@
 /* Show border on hover */
 .focus-input:hover,
 .notes-input:hover,
-.recap-input:hover {
+.recap-input:hover,
+.area-input:hover,
+.goal-input:hover {
     border-color: #aaa;
 }
 
 /* Show border when typing */
 .focus-input:focus,
 .notes-input:focus,
-.recap-input:focus {
+.recap-input:focus,
+.area-input:focus,
+.goal-input:focus {
     border-color: #007bff; /* or whatever accent color you like */
     outline: none; /* optional: removes blue default focus outline */
 }

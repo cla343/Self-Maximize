@@ -121,22 +121,30 @@ function createPermanentRow() {
     const row = document.createElement('div');
     row.classList.add('grid-row', 'grid-header');
     row.style.display = 'grid';
-    row.style.gridTemplateColumns = '.5fr 1fr';
+    row.style.columnGap = '10px';
+    row.style.gridTemplateColumns = '.5fr 1fr auto';
     row.style.fontWeight = 'bold';
     row.style.backgroundColor = '#f0f0f0';
-    row.style.border = '1px solid lightgrey';
 
     const areaCell = document.createElement('div');
     areaCell.innerText = 'Area';
     areaCell.style.padding = '10px';
     areaCell.style.textAlign = 'center';
     row.appendChild(areaCell);
+    areaCell.style.border = '1px solid lightgrey';
 
     const goalCell = document.createElement('div');
     goalCell.innerText = 'Goal';
     goalCell.style.padding = '10px';
     goalCell.style.textAlign = 'center';
     row.appendChild(goalCell);
+    goalCell.style.border = '1px solid lightgrey';
+
+    const emptyCell = document.createElement('div');
+    emptyCell.innerText = '';
+    emptyCell.style.padding = '0 44px';
+    emptyCell.style.textAlign = 'center';
+    row.appendChild(emptyCell);
 
     container.appendChild(row);
 }
@@ -148,15 +156,16 @@ createPermanentRow();
     row.classList.add('grid-row');
     row.style.display = 'grid';
     row.style.gridTemplateColumns = '.5fr 1fr auto';
+    row.style.columnGap = '10px';
 
     for (let colIndex = 0; colIndex < columns; colIndex++) {
         const cell = document.createElement('div');
         const editDiv = document.createElement('div');
         editDiv.contentEditable = 'true';
         editDiv.classList.add(colIndex === 0 ? 'area-input' : 'goal-input');
-        editDiv.innerText = getSavedCellValue(rowIndex, colIndex);
+        editDiv.innerText = getSavedCellValue(rowIndex, colIndex, weekRange);
         editDiv.dataset.key = `cell-${rowIndex}-${colIndex}-${weekRange}`;
-        editDiv.addEventListener('input', () => saveCellValue(rowIndex, colIndex, editDiv.innerText));
+        editDiv.addEventListener('input', () => saveCellValue(rowIndex, colIndex, editDiv.innerText, weekRange));
         cell.appendChild(editDiv);
         cell.style.border = '1px solid lightgrey';
         cell.style.padding = '10px';
@@ -175,7 +184,8 @@ createPermanentRow();
     deleteButton.onclick = () => {
         const rowIndex = Array.from(container.children).indexOf(row); 
         container.removeChild(row);
-       rows.forEach((row, index) => {
+        updateRowIndices(); // Important
+        rows.forEach((row, index) => {
         const area = row.querySelector('.area-input')?.innerText || '';
         const goal = row.querySelector('.goal-input')?.innerText || '';
 
@@ -197,15 +207,21 @@ createPermanentRow();
     container.appendChild(row);
 }
 
-let savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${getCurrentWeekRange()}`) || '0', 10);
-localStorage.setItem(`savedRowCount-${getCurrentWeekRange()}`, savedRowCount);
+const weekRange = getCurrentWeekRange();
+let savedRowCount = localStorage.getItem(`savedRowCount-${weekRange}`);
+if (savedRowCount === null) {
+    savedRowCount = 0;
+    localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
+} else {
+    savedRowCount = parseInt(savedRowCount, 10);
+}
 
 function updateRowIndices() {
     const weekRange = getCurrentWeekRange(); 
     const rows = container.querySelectorAll('.grid-row');
 
     rows.forEach((row, newIndex) => {
-        if (rowIndex === 0) return; // Skip permanent row
+        if (newIndex === 0) return; // Skip permanent row
         const area = row.querySelector('.area-input')?.innerText || '';
         const goal = row.querySelector('.goal-input')?.innerText || '';
         
@@ -219,11 +235,11 @@ function updateRowIndices() {
 
 function loadSavedRows() {
     const weekRange = getCurrentWeekRange();
-    const savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`) || '0', 10);
+    const savedRowCount = parseInt(localStorage.getItem(`row-count-${weekRange}`)) || 0;
     container.innerHTML = '';
     createPermanentRow();
     for (let rowIndex = 0; rowIndex < savedRowCount; rowIndex++) {
-        createRow(2, rowIndex);
+        createRow(2, rowIndex, weekRange);
     }
 }
 
