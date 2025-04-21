@@ -5,8 +5,8 @@ function getCurrentWeekRange(date = new Date()) {
     startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
     let endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
-    let startStr = startOfWeek.toISOString().split('T')[0]; // Format YYYY-MM-DD
-    let endStr = endOfWeek.toISOString().split('T')[0]; // Format YYYY-MM-DD
+    let startStr = startOfWeek.toLocaleDateString('en-CA'); // Same as YYYY-MM-DD
+    let endStr = endOfWeek.toLocaleDateString('en-CA');
     return `${startStr} - ${endStr}`;
 }
 
