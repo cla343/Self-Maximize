@@ -186,8 +186,8 @@ createPermanentRow();
         container.removeChild(row);
         updateRowIndices(); // Important
         rows.forEach((row, index) => {
-        const area = row.querySelector('.area-input')?.innerText || '';
-        const goal = row.querySelector('.goal-input')?.innerText || '';
+            const area = areaInput ? (areaInput.value || areaInput.innerText || '') : '';
+            const goal = goalInput ? (goalInput.value || goalInput.innerText || '') : '';
 
         localStorage.setItem(`cell-${index}-0-${weekRange}`, area);
         localStorage.setItem(`cell-${index}-1-${weekRange}`, goal);
