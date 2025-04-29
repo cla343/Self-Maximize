@@ -184,17 +184,8 @@ createPermanentRow();
     deleteButton.onclick = () => {
         const rowIndex = Array.from(container.children).indexOf(row); 
         container.removeChild(row);
-        updateRowIndices(); // Important
-        rows.forEach((row, index) => {
-            const area = areaInput ? (areaInput.value || areaInput.innerText || '') : '';
-            const goal = goalInput ? (goalInput.value || goalInput.innerText || '') : '';
-
-        localStorage.setItem(`cell-${index}-0-${weekRange}`, area);
-        localStorage.setItem(`cell-${index}-1-${weekRange}`, goal);
-    });
-
-    savedRowCount = rows.length - 1;
-    localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
+        removeRowFromStorage(rowIndex, weekRange);
+        updateRowIndices();
 }
 
     const deleteCell = document.createElement('div');
@@ -220,14 +211,35 @@ function updateRowIndices() {
     const weekRange = getCurrentWeekRange(); 
     const rows = container.querySelectorAll('.grid-row');
 
+
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('areaName-')) {
+            localStorage.removeItem(key);
+        }
+    });
+
     rows.forEach((row, newIndex) => {
         if (newIndex === 0) return; // Skip permanent row
         const area = row.querySelector('.area-input')?.innerText || '';
         const goal = row.querySelector('.goal-input')?.innerText || '';
         
-        localStorage.setItem(`cell-${newIndex}-0-${weekRange}`, area);
-        localStorage.setItem(`cell-${newIndex}-1-${weekRange}`, goal);
-    });
+        localStorage.setItem(`cell-${newIndex - 1}-0-${weekRange}`, area);
+        localStorage.setItem(`cell-${newIndex - 1}-1-${weekRange}`, goal);
+        localStorage.setItem(`areaName-${newIndex - 1}`, area);
+        });
+
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('cell-')) {
+                const match = key.match(/^cell-(\d+)-\d+-(.+)$/);
+                if (match) {
+                    const rowIndex = parseInt(match[1], 10);
+                    const keyWeek = match[2];
+                    if (keyWeek === weekRange && rowIndex >= (rows.length - 1)) {
+                        localStorage.removeItem(key);
+                    }
+                }
+            }
+        });
 
     savedRowCount = rows.length -1;
     localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
