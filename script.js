@@ -124,7 +124,6 @@ function createPermanentRow() {
     row.style.columnGap = '10px';
     row.style.gridTemplateColumns = '.5fr 1fr auto';
     row.style.fontWeight = 'bold';
-    row.style.backgroundColor = '#f0f0f0';
 
     const areaCell = document.createElement('div');
     areaCell.innerText = 'Area';
@@ -132,6 +131,8 @@ function createPermanentRow() {
     areaCell.style.textAlign = 'center';
     row.appendChild(areaCell);
     areaCell.style.border = '1px solid lightgrey';
+    areaCell.style.backgroundColor = '#f0f0f0';
+
 
     const goalCell = document.createElement('div');
     goalCell.innerText = 'Goal';
@@ -139,6 +140,8 @@ function createPermanentRow() {
     goalCell.style.textAlign = 'center';
     row.appendChild(goalCell);
     goalCell.style.border = '1px solid lightgrey';
+    goalCell.style.backgroundColor = '#f0f0f0';
+
 
     const emptyCell = document.createElement('div');
     emptyCell.innerText = '';
@@ -186,6 +189,7 @@ createPermanentRow();
         container.removeChild(row);
         removeRowFromStorage(rowIndex, weekRange);
         updateRowIndices();
+        createPermanentChecklist();
 }
 
     const deleteCell = document.createElement('div');
@@ -472,8 +476,13 @@ function applyDarkModeStyles(isDarkMode) {
     });
 
     document.querySelectorAll('.grid-header').forEach(header => {
-        header.style.backgroundColor = isDarkMode ? '#333' : '#f0f0f0';
-        header.style.color = isDarkMode ? '#fff' : '#000';
+        if (isDarkMode) {
+            header.style.backgroundColor = '#333';
+            header.style.color = '#fff';
+        } else {
+            header.style.backgroundColor = ''; // Keeps whatever default or CSS background you have
+            header.style.color = '#000';
+        }
     });
 
     document.querySelectorAll('.grid-cell').forEach(cell => {
