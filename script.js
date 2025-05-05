@@ -17,7 +17,7 @@ weekContainer.style.display = 'flex';
 weekContainer.style.justifyContent = 'center';
 weekContainer.style.alignItems = 'center';
 const weekText = document.createElement('span');
-weekText.textContent = lastWeek;
+weekText.textContent = '📅 ' + lastWeek;
 weekText.style.margin = '0 10px';
 weekText.style.fontWeight = 'bold';
 const weekTogglePrevious = document.createElement('button');
@@ -35,7 +35,8 @@ weekToggleNext.textContent = '>';
 });
 
 function getStartDateFromWeekText(weekTextContent) {
-    const weekStartDate = weekTextContent.split(' - ')[0];
+    const cleanedText = weekTextContent.replace('📅 ', '');
+    const weekStartDate = cleanedText.split(' - ')[0];
     const parts = weekStartDate.split('-');
     return new Date(parts[0], parts[1] - 1, parts[2]);
 }
@@ -90,7 +91,7 @@ weekContainer.appendChild(weekToggleNext);
 week.appendChild(weekContainer);
 
 const focus = document.querySelector('.primary-focus');
-focus.innerHTML = '<span>Primary Focus:</span> <div class="focus-input" contenteditable="true"></div>';
+focus.innerHTML = '<span>🎯 Primary Focus:</span> <div class="focus-input" contenteditable="true"></div>';
 const input = document.querySelector('.focus-input');
 input.addEventListener('input', () => {
     const currentWeek = weekText.textContent;
@@ -100,7 +101,7 @@ focus.style.justifyContent = 'center';
 
 const notes = document.querySelector('.notes');
 const notesHeader = notes.querySelector('.header');
-notesHeader.innerHTML = '<span>Notes & Adjustments for the Week</span> <div class="notes-input" contenteditable="true"></div>';
+notesHeader.innerHTML = '<span>🧠 Notes & Adjustments for the Week</span> <div class="notes-input" contenteditable="true"></div>';
 notesHeader.querySelector('span').style.fontSize = '20px';
 notesHeader.querySelector('span').style.fontWeight = 'bold';
 notesHeader.style.marginTop = '20px'; // Adjust the value as needed
@@ -127,6 +128,7 @@ function createPermanentRow() {
 
     const areaCell = document.createElement('div');
     areaCell.innerText = 'Area';
+    areaCell.classList.add('area-cell');
     areaCell.style.padding = '10px';
     areaCell.style.textAlign = 'center';
     row.appendChild(areaCell);
@@ -136,6 +138,7 @@ function createPermanentRow() {
 
     const goalCell = document.createElement('div');
     goalCell.innerText = 'Goal';
+    goalCell.classList.add('goal-cell');
     goalCell.style.padding = '10px';
     goalCell.style.textAlign = 'center';
     row.appendChild(goalCell);
@@ -279,6 +282,11 @@ function removeRowFromStorage(rowIndex, weekRange = getCurrentWeekRange()) {
     }
 }
 
+const buttonContainer = document.createElement('div');
+buttonContainer.style.display = 'flex';
+buttonContainer.style.justifyContent = 'flex-end';
+buttonContainer.style.marginTop = '10px';
+
 const addRowButton = document.createElement('button');
 addRowButton.textContent = 'Add Row';
 addRowButton.style.backgroundColor = 'green';
@@ -286,7 +294,7 @@ addRowButton.style.color = 'white';
 addRowButton.style.border = 'none';
 addRowButton.style.cursor = 'pointer';
 addRowButton.style.borderRadius = '5px';
-addRowButton.style.padding = '5px 10px';
+addRowButton.style.padding = '5px 17.5px';
 addRowButton.onclick = () => {
     const weekRange = weekText.textContent;
     createRow(2, savedRowCount, weekRange);
@@ -295,7 +303,8 @@ addRowButton.onclick = () => {
     createPermanentChecklist();
 };
 const grid1 = document.querySelector('.grid-1');
-grid1.appendChild(addRowButton);
+buttonContainer.appendChild(addRowButton);
+grid1.appendChild(buttonContainer);
 
 const currentWeek = getCurrentWeekRange();
 
@@ -329,7 +338,7 @@ function createPermanentChecklist() {
     }
 
     //Style the header
-    habitTrackerHead.innerHTML = 'Daily Habit Tracker';
+    habitTrackerHead.innerHTML = '📊 Daily Habit Tracker';
     habitTrackerHead.style.marginTop = '30px'; 
     habitTrackerHead.style.marginBottom = '20px'; 
     habitTrackerHead.style.fontSize = '20px';
@@ -437,7 +446,7 @@ createPermanentChecklist();
 document.addEventListener('DOMContentLoaded', () => {
 const weekReview = document.querySelector('.recap');
 if (!weekReview) return;
-weekReview.innerHTML = '<span>End of Week Review</span> <div class="recap-input" contenteditable="true"></div>';
+weekReview.innerHTML = '<span>📝 End of Week Review</span> <div class="recap-input" contenteditable="true"></div>';
 const recapInput = weekReview.querySelector('.recap-input');
 const currentWeekRange = getCurrentWeekRange(); // ✅ Call the function
 recapInput.innerText = localStorage.getItem(`weekRecap-${currentWeekRange}`) || '';
@@ -448,7 +457,6 @@ recapInput.addEventListener('input', () => {
 weekReview.style.marginTop = '30px'; // Adjust the value as needed
 weekReview.querySelector('span').style.fontSize = '20px';
 weekReview.querySelector('span').style.fontWeight = 'bold'; 
-recapInput.style.marginTop = '30px'; // Adjust the value as needed
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -480,10 +488,30 @@ function applyDarkModeStyles(isDarkMode) {
             header.style.backgroundColor = '#333';
             header.style.color = '#fff';
         } else {
-            header.style.backgroundColor = ''; // Keeps whatever default or CSS background you have
             header.style.color = '#000';
         }
     });
+
+    document.querySelectorAll('.area-cell').forEach(header => {
+        if (isDarkMode) {
+            header.style.backgroundColor = 'black';
+            header.style.color = '#fff';
+        } else {
+            header.style.backgroundColor = '#f0f0f0';
+            header.style.color = '#000';
+        }
+    });
+
+    document.querySelectorAll('.goal-cell').forEach(header => {
+        if (isDarkMode) {
+            header.style.backgroundColor = 'black';
+            header.style.color = '#fff';
+        } else {
+            header.style.backgroundColor = '#f0f0f0';
+            header.style.color = '#000';
+        }
+    });
+
 
     document.querySelectorAll('.grid-cell').forEach(cell => {
         cell.style.backgroundColor = isDarkMode ? '#444' : '#fff';
@@ -520,3 +548,5 @@ const savedMode = localStorage.getItem('darkMode') === 'true';
 applyDarkModeStyles(savedMode); // Apply saved mode on page load
 
 loadWeekData(lastWeek);
+
+/* make rows reorderable, add colors, shading etc for improved UX */
