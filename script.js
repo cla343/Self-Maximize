@@ -159,10 +159,11 @@ createPermanentRow();
 
     function createRow(columns = 2, rowIndex = savedRowCount, weekRange = getCurrentWeekRange()) {
     const row = document.createElement('div');
-    row.classList.add('grid-row');
+    row.classList.add('grid-row','draggable');
     row.style.display = 'grid';
     row.style.gridTemplateColumns = '.5fr 1fr auto';
     row.style.columnGap = '10px';
+    row.draggable = true;
 
     for (let colIndex = 0; colIndex < columns; colIndex++) {
         const cell = document.createElement('div');
@@ -178,6 +179,51 @@ createPermanentRow();
         cell.style.textAlign = 'center';
         row.appendChild(cell);
     }
+
+    const draggables = document.querySelectorAll('.draggable');
+    const container = document.querySelector('.grid');
+
+            container.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('draggable')) {
+                    console.log("Drag started on:", e.target);
+                    e.target.classList.add('dragging');
+                }
+            });
+            
+            container.addEventListener('dragend', (e) => {
+                if (e.target.classList.contains('draggable')) {
+                    console.log("Drag ended on:", e.target);
+                    e.target.classList.remove('dragging');
+                    updateRowIndices();
+                    createPermanentChecklist();
+                }
+            });
+            
+
+         container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const draggable = document.querySelector('.dragging');     
+            const afterElement = getDragAfterElement(container, e.clientY);
+            if (afterElement == null) {
+                container.appendChild(draggable);
+            } else {
+                container.insertBefore(draggable, afterElement);
+            }
+        });
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect()
+                const offset = y - box.top - box.height / 2
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child }
+                } else {
+                    return closest
+                }
+            }, {offset: Number.NEGATIVE_INFINITY}).element
+        }
+
 
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'Delete Row';
