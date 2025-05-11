@@ -302,7 +302,7 @@ function updateRowIndices() {
 
 function loadSavedRows() {
     const weekRange = getCurrentWeekRange();
-    const savedRowCount = parseInt(localStorage.getItem(`row-count-${weekRange}`)) || 0;
+    const savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`)) || 0;
     container.innerHTML = '';
     createPermanentRow();
     for (let rowIndex = 0; rowIndex < savedRowCount; rowIndex++) {
@@ -344,7 +344,7 @@ addRowButton.style.cursor = 'pointer';
 addRowButton.style.borderRadius = '5px';
 addRowButton.style.padding = '5px 17.5px';
 addRowButton.onclick = () => {
-    const weekRange = weekText.textContent;
+    const weekRange = getCurrentWeekRange();
     createRow(2, savedRowCount, weekRange);
     savedRowCount++;
     localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
