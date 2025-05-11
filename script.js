@@ -101,12 +101,14 @@ focus.style.justifyContent = 'center';
 
 const notes = document.querySelector('.notes');
 const notesHeader = notes.querySelector('.header');
-notesHeader.innerHTML = '<span>🧠 Notes & Adjustments for the Week</span> <div class="notes-input" contenteditable="true"></div>';
+notesHeader.innerHTML = '<span>🧠 Notes & Adjustments for the Week</span>';
 notesHeader.querySelector('span').style.fontSize = '20px';
 notesHeader.querySelector('span').style.fontWeight = 'bold';
 notesHeader.style.marginTop = '20px'; // Adjust the value as needed
 
-const notesInput = notesHeader.querySelector('.notes-input');
+const notesInput = document.createElement('div');
+notesInput.classList.add('notes-input');
+notesInput.contentEditable = 'true';
 const currentWeekRange =  getCurrentWeekRange();
 notesInput.innerText = localStorage.getItem(`weeklyNotes-${currentWeekRange}`) || '';
 notesInput.addEventListener('input', () => {
@@ -363,7 +365,7 @@ if (currentWeek !== lastWeek) {
     localStorage.setItem('lastWeek', currentWeek);
 }
 
-notesHeader.appendChild(notesInput);
+// notesHeader.appendChild(notesInput);
 
 const savedFocus = localStorage.getItem('primaryFocus');
 if (savedFocus) {
@@ -428,6 +430,58 @@ function createPermanentChecklist() {
         dayCell.style.gridColumn = '1';
         dayCell.style.gridRow = `${rowIndex + 2}`; // Start below headers
         headChecklist.appendChild(dayCell);
+});
+
+    // Create a notes section for each area
+const notesContainer = document.querySelector('.notes'); 
+notesContainer.style.display = 'flex';
+notesContainer.style.flexDirection = 'column'; // Stack header and notes
+
+// Create a wrapper for notes sections
+const notesContent = document.createElement('div');
+notesContent.classList.add('notes-content');
+notesContent.style.display = 'flex';
+notesContent.style.flexWrap = 'wrap';
+notesContent.style.gap = '20px';
+
+// Append the wrapper to the main notes container
+notesContainer.appendChild(notesContent);
+
+areaInputs.forEach((input, index) => {
+    const notesSection = document.createElement('div');
+    notesSection.classList.add('notes-section');
+
+    const notesLabel = document.createElement('span');
+    notesLabel.innerText = `${input.innerText || `Area ${index + 1}`}`;
+    notesLabel.style.fontSize = '16px';
+    notesLabel.style.fontWeight = 'bold';
+    notesLabel.style.display = 'flex';
+    notesLabel.style.justifyContent = 'center';
+    notesLabel.style.alignItems = 'center';
+    notesLabel.style.marginBottom = '5px';
+
+    const notesInput = document.createElement('div');
+    notesInput.classList.add('notes-input');
+    notesInput.contentEditable = 'true';
+
+    // Load stored notes for this area
+    const currentWeekRange = getCurrentWeekRange();
+    notesInput.innerText = localStorage.getItem(`notes-${index}-${currentWeekRange}`) || '';
+
+    // Save notes when edited
+    notesInput.addEventListener('input', () => {
+        localStorage.setItem(`notes-${index}-${currentWeekRange}`, notesInput.innerText);
+    });
+
+    notesSection.appendChild(notesLabel);
+    notesSection.appendChild(notesInput);
+    notesContent.appendChild(notesSection); // Append to wrapper instead of main container
+
+    // Update header dynamically if area name changes
+    input.addEventListener('input', () => {
+        localStorage.setItem(`areaName-${index}`, input.innerText);
+        notesLabel.innerText = `${input.innerText || `Area ${index + 1}`}`;
+    });
 });
 
     areaInputs.forEach((input, index) => {

@@ -26,6 +26,14 @@
     padding-top: 2px;
 }
 
+.header > span,
+.habit-tracker > .header,
+.recap > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .primary-focus > span {
     font-weight: bold;
     font-size: 18px;
@@ -91,9 +99,20 @@
 }
 
 .focus-input,
-.notes-input,
 .recap-input {
     border: 2px solid transparent;
+    padding: 8px;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+    min-height: 40px;
+}
+
+.recap-input {
+    margin-top: 10px;
+}
+
+.notes-input {
+    border: 2px solid lightgray;
     padding: 8px;
     border-radius: 8px;
     transition: border-color 0.2s ease;
@@ -141,4 +160,21 @@
 
 .draggable.dragging {
     opacity: 0.5;
+}
+
+.notes-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between; /* Evenly distribute sections */
+}
+
+.notes-section {
+    flex: 1; /* Ensures equal width distribution */
+    min-width: 200px; /* Prevents collapsing */
+    max-width: 25%; /* Limits width so notes stay readable */
+}
+
+.notes > .header {
+    margin-bottom: 20px;
 }
