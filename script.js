@@ -45,9 +45,9 @@ weekTogglePrevious.onclick = () => {
     let currentStartDate = getStartDateFromWeekText(weekText.textContent);
     currentStartDate.setDate(currentStartDate.getDate() - 7);
     let previousWeek = getCurrentWeekRange(currentStartDate);
+    loadWeekData(previousWeek);
     weekText.textContent = previousWeek;
     localStorage.setItem('lastWeek', previousWeek);
-    loadWeekData(previousWeek); 
 };
 
 weekToggleNext.onclick = () => {
@@ -444,6 +444,8 @@ notesContent.style.display = 'flex';
 notesContent.style.flexWrap = 'wrap';
 notesContent.style.gap = '20px';
 
+const oldNotesContent = notesContainer.querySelector('.notes-content');
+if (oldNotesContent) oldNotesContent.remove();
 // Append the wrapper to the main notes container
 notesContainer.appendChild(notesContent);
 
@@ -479,8 +481,8 @@ areaInputs.forEach((input, index) => {
 
     // Update header dynamically if area name changes
     input.addEventListener('input', () => {
-        localStorage.setItem(`areaName-${index}`, input.innerText);
-        notesLabel.innerText = `${input.innerText || `Area ${index + 1}`}`;
+        localStorage.setItem(`areaName-${index}`, input.innerText.trim());
+        notesLabel.innerText = `${input.innerText.trim() || `Area ${index + 1}`}`;
     });
 });
 
@@ -518,7 +520,7 @@ areaInputs.forEach((input, index) => {
             checkbox.classList.add('habit-checkbox');
             checkbox.dataset.area = areaName;
             checkbox.dataset.day = day; // Add data attribute for the day
-            const key = `weekly-${currentWeek}-${areaName}-${day}`;
+            const key = `weekly-${currentWeek}-${index}-${day}`;
             checkbox.checked = localStorage.getItem(key) === 'true';
             checkbox.addEventListener('change', (event) => {
                 const isChecked = event.target.checked;
@@ -648,5 +650,3 @@ const savedMode = localStorage.getItem('darkMode') === 'true';
 applyDarkModeStyles(savedMode); // Apply saved mode on page load
 
 loadWeekData(lastWeek);
-
-/* make rows reorderable, add colors, shading etc for improved UX */
