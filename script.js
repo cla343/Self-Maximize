@@ -46,7 +46,7 @@ weekTogglePrevious.onclick = () => {
     currentStartDate.setDate(currentStartDate.getDate() - 7);
     let previousWeek = getCurrentWeekRange(currentStartDate);
     loadWeekData(previousWeek);
-    weekText.textContent = previousWeek;
+    weekText.textContent = '📅 ' + previousWeek;
     localStorage.setItem('lastWeek', previousWeek);
     
     // Check if the addRowButton already exists
@@ -76,7 +76,7 @@ weekToggleNext.onclick = () => {
     let currentStartDate = getStartDateFromWeekText(weekText.textContent);
     currentStartDate.setDate(currentStartDate.getDate() + 7);
     let nextWeek = getCurrentWeekRange(currentStartDate);
-    weekText.textContent = nextWeek;        
+    weekText.textContent = '📅 ' + nextWeek;        
     localStorage.setItem('lastWeek', nextWeek);
     loadWeekData(nextWeek);
 
