@@ -48,6 +48,28 @@ weekTogglePrevious.onclick = () => {
     loadWeekData(previousWeek);
     weekText.textContent = previousWeek;
     localStorage.setItem('lastWeek', previousWeek);
+    
+    // Check if the addRowButton already exists
+    const addRowButton = document.querySelector('.addRowButton');
+
+    // Find the empty cell where the button should be placed
+    const emptyCell = document.querySelector('.emptyCell');
+
+    // If the button is not found, append it
+    if (!addRowButton) {
+        const newAddRowButton = document.createElement('button');
+        newAddRowButton.classList.add('addRowButton');
+        newAddRowButton.innerText = 'Add Row';
+        newAddRowButton.style.backgroundColor = 'green';
+        newAddRowButton.style.color = 'white';
+        newAddRowButton.style.border = 'none';
+        newAddRowButton.style.cursor = 'pointer';
+        newAddRowButton.style.borderRadius = '5px';
+        newAddRowButton.style.padding = '5px 17.5px';
+
+        // Append the new button to the emptyCell
+        emptyCell.appendChild(newAddRowButton);
+    }
 };
 
 weekToggleNext.onclick = () => {
@@ -57,6 +79,28 @@ weekToggleNext.onclick = () => {
     weekText.textContent = nextWeek;        
     localStorage.setItem('lastWeek', nextWeek);
     loadWeekData(nextWeek);
+
+    // Check if the addRowButton already exists
+    const addRowButton = document.querySelector('.addRowButton');
+
+    // Find the empty cell where the button should be placed
+    const emptyCell = document.querySelector('.emptyCell');
+
+    // If the button is not found, append it
+    if (!addRowButton) {
+        const newAddRowButton = document.createElement('button');
+        newAddRowButton.classList.add('addRowButton');
+        newAddRowButton.innerText = 'Add Row';
+        newAddRowButton.style.backgroundColor = 'green';
+        newAddRowButton.style.color = 'white';
+        newAddRowButton.style.border = 'none';
+        newAddRowButton.style.cursor = 'pointer';
+        newAddRowButton.style.borderRadius = '5px';
+        newAddRowButton.style.padding = '5px 17.5px';
+
+        // Append the new button to the emptyCell
+        emptyCell.appendChild(newAddRowButton);
+    }
 };
 
 function loadWeekData(weekRange) {
@@ -104,7 +148,8 @@ const notesHeader = notes.querySelector('.header');
 notesHeader.innerHTML = '<span>🧠 Notes & Adjustments for the Week</span>';
 notesHeader.querySelector('span').style.fontSize = '20px';
 notesHeader.querySelector('span').style.fontWeight = 'bold';
-notesHeader.style.marginTop = '20px'; // Adjust the value as needed
+notesHeader.style.marginTop = '50px'; // Adjust the value as needed
+notesHeader.style.marginBottom = '30px'; // Adjust the value as needed
 
 const notesInput = document.createElement('div');
 notesInput.classList.add('notes-input');
@@ -150,8 +195,11 @@ function createPermanentRow() {
 
     const emptyCell = document.createElement('div');
     emptyCell.innerText = '';
-    emptyCell.style.padding = '0 44px';
+    emptyCell.classList.add('emptyCell');
     emptyCell.style.textAlign = 'center';
+    emptyCell.style.display = 'flex';
+    emptyCell.style.justifyContent = 'center';
+    emptyCell.style.alignItems = 'center';
     row.appendChild(emptyCell);
 
     container.appendChild(row);
@@ -330,10 +378,10 @@ function removeRowFromStorage(rowIndex, weekRange = getCurrentWeekRange()) {
     }
 }
 
-const buttonContainer = document.createElement('div');
-buttonContainer.style.display = 'flex';
-buttonContainer.style.justifyContent = 'flex-end';
-buttonContainer.style.marginTop = '10px';
+// const buttonContainer = document.createElement('div');
+// buttonContainer.style.display = 'flex';
+// buttonContainer.style.justifyContent = 'flex-end';
+// buttonContainer.style.marginTop = '10px';
 
 const addRowButton = document.createElement('button');
 addRowButton.textContent = 'Add Row';
@@ -350,9 +398,14 @@ addRowButton.onclick = () => {
     localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
     createPermanentChecklist();
 };
-const grid1 = document.querySelector('.grid-1');
-buttonContainer.appendChild(addRowButton);
-grid1.appendChild(buttonContainer);
+
+document.addEventListener('DOMContentLoaded', () => {
+const emptyCell = document.querySelector('.emptyCell');
+emptyCell.appendChild(addRowButton);
+});
+// const grid1 = document.querySelector('.grid-1');
+// buttonContainer.appendChild(addRowButton);
+// grid1.appendChild(buttonContainer);
 
 const currentWeek = getCurrentWeekRange();
 
@@ -556,7 +609,6 @@ recapInput.addEventListener('input', () => {
     const weekRange = getCurrentWeekRange(); // Recalculate in case the week changed
     localStorage.setItem(`weekRecap-${weekRange}`, recapInput.innerText);
 });
-weekReview.style.marginTop = '30px'; // Adjust the value as needed
 weekReview.querySelector('span').style.fontSize = '20px';
 weekReview.querySelector('span').style.fontWeight = 'bold'; 
 });

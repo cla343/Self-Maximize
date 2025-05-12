@@ -112,7 +112,8 @@
 }
 
 .recap-input {
-    margin-top: 10px;
+    margin-top: 20px;
+    margin-bottom: 50px;
 }
 
 .notes-input {
@@ -195,4 +196,8 @@
 
 .notes > .header {
     margin-bottom: 20px;
+}
+
+.recap {
+    margin-top: 60px;
 }
