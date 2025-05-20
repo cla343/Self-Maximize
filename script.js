@@ -1,3 +1,5 @@
+import { createCalendarPopup } from './calendarPopup.js';
+
 function getCurrentWeekRange(date = new Date()) {
     let dayIndex = date.getDay();
     let daysToMonday = dayIndex === 1 ? 0 : (dayIndex === 0 ? 6 : dayIndex - 1);
@@ -17,7 +19,7 @@ weekContainer.style.display = 'flex';
 weekContainer.style.justifyContent = 'center';
 weekContainer.style.alignItems = 'center';
 const weekText = document.createElement('span');
-weekText.textContent = '📅 ' + lastWeek;
+weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${lastWeek}`;
 weekText.style.margin = '0 10px';
 weekText.style.fontWeight = 'bold';
 const weekTogglePrevious = document.createElement('button');
@@ -46,7 +48,7 @@ weekTogglePrevious.onclick = () => {
     currentStartDate.setDate(currentStartDate.getDate() - 7);
     let previousWeek = getCurrentWeekRange(currentStartDate);
     loadWeekData(previousWeek);
-    weekText.textContent = '📅 ' + previousWeek;
+    weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
     localStorage.setItem('lastWeek', previousWeek);
     
     // Check if the addRowButton already exists
@@ -76,7 +78,7 @@ weekToggleNext.onclick = () => {
     let currentStartDate = getStartDateFromWeekText(weekText.textContent);
     currentStartDate.setDate(currentStartDate.getDate() + 7);
     let nextWeek = getCurrentWeekRange(currentStartDate);
-    weekText.textContent = '📅 ' + nextWeek;        
+    weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${nextWeek}`;
     localStorage.setItem('lastWeek', nextWeek);
     loadWeekData(nextWeek);
 
@@ -128,6 +130,41 @@ function loadWeekData(weekRange) {
 savedRowCount = rowCount;
 createPermanentChecklist();
 }
+// Bind events to the calendar emoji
+const calendarEmoji = weekText.querySelector('.calendar-emoji');
+calendarEmoji.onmouseenter = () => calendarEmoji.style.color = 'blue';
+calendarEmoji.onmouseleave = () => calendarEmoji.style.color = '';
+calendarEmoji.onclick = () => {
+    const popup = createCalendarPopup((selectedDate) => {
+        const weekRange = getCurrentWeekRange(selectedDate);
+        loadWeekData(weekRange);
+        weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${weekRange}`;
+        localStorage.setItem('lastWeek', weekRange);
+        // Rebind events because you replaced innerHTML
+        bindCalendarEmojiEvents();
+    });
+    document.body.appendChild(popup);
+};
+
+function bindCalendarEmojiEvents() {
+    const calendarEmoji = weekText.querySelector('.calendar-emoji');
+    calendarEmoji.onmouseenter = () => calendarEmoji.style.color = 'blue';
+    calendarEmoji.onmouseleave = () => calendarEmoji.style.color = '';
+    calendarEmoji.onclick = () => {
+        const popup = createCalendarPopup((selectedDate) => {
+            const weekRange = getCurrentWeekRange(selectedDate);
+            loadWeekData(weekRange);
+            weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${weekRange}`;
+            localStorage.setItem('lastWeek', weekRange);
+            bindCalendarEmojiEvents();
+        });
+        document.body.appendChild(popup);
+    };
+}
+
+// Call this once initially:
+bindCalendarEmojiEvents();
+
 
 weekContainer.appendChild(weekTogglePrevious);
 weekContainer.appendChild(weekText);
