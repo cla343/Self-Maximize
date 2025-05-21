@@ -50,7 +50,8 @@ weekTogglePrevious.onclick = () => {
     loadWeekData(previousWeek);
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
     localStorage.setItem('lastWeek', previousWeek);
-    
+    bindCalendarEmojiEvents();
+
     // Check if the addRowButton already exists
     const addRowButton = document.querySelector('.addRowButton');
 
@@ -81,6 +82,7 @@ weekToggleNext.onclick = () => {
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${nextWeek}`;
     localStorage.setItem('lastWeek', nextWeek);
     loadWeekData(nextWeek);
+    bindCalendarEmojiEvents();
 
     // Check if the addRowButton already exists
     const addRowButton = document.querySelector('.addRowButton');
