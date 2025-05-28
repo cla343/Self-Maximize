@@ -67,24 +67,21 @@ function getStartDateFromWeekText(weekTextContent) {
     return new Date(parts[0], parts[1] - 1, parts[2]);
 }
 
-weekTogglePrevious.onclick = () => {
-    let currentStartDate = getStartDateFromWeekText(weekText.textContent);
-    currentStartDate.setDate(currentStartDate.getDate() - 7);
-    let previousWeek = getCurrentWeekRange(currentStartDate);
-    loadWeekData(previousWeek);
-    weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
-    localStorage.setItem('lastWeek', previousWeek);
-    renderGridForWeek(previousWeek);  // refresh the grid for the newly selected week
-    loadLastWeeksData(previousWeek); 
-    bindCalendarEmojiEvents();
+function renderGridForWeek(weekRange) {
+    console.log("Rendering grid for:", weekRange);
 
-    // Check if the addRowButton already exists
+    // Find the existing emptyCell in the header
+    const emptyCell = document.querySelector('.grid-header .emptyCell');
+    if (!emptyCell) {
+        console.error("emptyCell not found!");
+        return;
+    }
+
+    // Clear the emptyCell content first (optional, to prevent duplicates)
+    emptyCell.innerHTML = '';
+
+    // Add the Add Row button if it doesn’t already exist
     const addRowButton = document.querySelector('.addRowButton');
-
-    // Find the empty cell where the button should be placed
-    const emptyCell = document.querySelector('.emptyCell');
-
-    // If the button is not found, append it
     if (!addRowButton) {
         const newAddRowButton = document.createElement('button');
         newAddRowButton.classList.add('addRowButton');
@@ -96,9 +93,24 @@ weekTogglePrevious.onclick = () => {
         newAddRowButton.style.borderRadius = '5px';
         newAddRowButton.style.padding = '5px 17.5px';
 
-        // Append the new button to the emptyCell
         emptyCell.appendChild(newAddRowButton);
     }
+
+    console.log("Grid rendered. Is emptyCell found?", emptyCell);
+}
+
+weekTogglePrevious.onclick = () => {
+    let currentStartDate = getStartDateFromWeekText(weekText.textContent);
+    currentStartDate.setDate(currentStartDate.getDate() - 7);
+    let previousWeek = getCurrentWeekRange(currentStartDate);
+    loadWeekData(previousWeek);
+    weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
+    localStorage.setItem('lastWeek', previousWeek);
+    renderGridForWeek(previousWeek);  // refresh the grid for the newly selected week
+    console.log("Grid rendered. Is emptyCell found?", document.querySelector('.emptyCell'));
+
+    loadLastWeeksData(previousWeek); 
+    bindCalendarEmojiEvents();
 };
 
 weekToggleNext.onclick = () => {
@@ -109,30 +121,10 @@ weekToggleNext.onclick = () => {
     localStorage.setItem('lastWeek', nextWeek);
     loadWeekData(nextWeek);
     renderGridForWeek(nextWeek);  // refresh the grid for the newly selected week
+    console.log("Grid rendered. Is emptyCell found?", document.querySelector('.emptyCell'));
+
     loadLastWeeksData(nextWeek); 
     bindCalendarEmojiEvents();
-
-    // Check if the addRowButton already exists
-    const addRowButton = document.querySelector('.addRowButton');
-
-    // Find the empty cell where the button should be placed
-    const emptyCell = document.querySelector('.emptyCell');
-
-    // If the button is not found, append it
-    if (!addRowButton) {
-        const newAddRowButton = document.createElement('button');
-        newAddRowButton.classList.add('addRowButton');
-        newAddRowButton.innerText = 'Add Row';
-        newAddRowButton.style.backgroundColor = 'green';
-        newAddRowButton.style.color = 'white';
-        newAddRowButton.style.border = 'none';
-        newAddRowButton.style.cursor = 'pointer';
-        newAddRowButton.style.borderRadius = '5px';
-        newAddRowButton.style.padding = '5px 17.5px';
-
-        // Append the new button to the emptyCell
-        emptyCell.appendChild(newAddRowButton);
-    }
 };
 
 function loadWeekData(weekRange) {
