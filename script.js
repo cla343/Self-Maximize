@@ -1,6 +1,15 @@
 import { createCalendarPopup } from './calendarPopup.js';
+import { loadLastWeeksData } from './loadLastWeeksData.js';
 
-function getCurrentWeekRange(date = new Date()) {
+document.addEventListener('DOMContentLoaded', () => {
+    if (!document.querySelector('.grid-header')) {
+        createPermanentRow();
+      }
+    loadLastWeeksData();
+    bindCalendarEmojiEvents();
+});
+
+export function getCurrentWeekRange(date = new Date()) {
     let dayIndex = date.getDay();
     let daysToMonday = dayIndex === 1 ? 0 : (dayIndex === 0 ? 6 : dayIndex - 1);
     let startOfWeek = new Date(date);
@@ -11,6 +20,21 @@ function getCurrentWeekRange(date = new Date()) {
     let endStr = endOfWeek.toLocaleDateString('en-CA');
     return `${startStr} - ${endStr}`;
 }
+
+export function getPreviousWeekRange() {
+    const now = new Date();
+    const startOfThisWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    const startOfLastWeek = new Date(startOfThisWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+  
+    const endOfLastWeek = new Date(startOfLastWeek);
+    endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
+  
+    const startStr = startOfLastWeek.toISOString().split('T')[0];
+    const endStr = endOfLastWeek.toISOString().split('T')[0];
+  
+    return `${startStr}_to_${endStr}`;
+  }  
 
 const lastWeek = localStorage.getItem('lastWeek') || getCurrentWeekRange();
 const week = document.querySelector('.week');
@@ -50,6 +74,8 @@ weekTogglePrevious.onclick = () => {
     loadWeekData(previousWeek);
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
     localStorage.setItem('lastWeek', previousWeek);
+    renderGridForWeek(previousWeek);  // refresh the grid for the newly selected week
+    loadLastWeeksData(previousWeek); 
     bindCalendarEmojiEvents();
 
     // Check if the addRowButton already exists
@@ -82,6 +108,8 @@ weekToggleNext.onclick = () => {
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${nextWeek}`;
     localStorage.setItem('lastWeek', nextWeek);
     loadWeekData(nextWeek);
+    renderGridForWeek(nextWeek);  // refresh the grid for the newly selected week
+    loadLastWeeksData(nextWeek); 
     bindCalendarEmojiEvents();
 
     // Check if the addRowButton already exists
@@ -246,7 +274,7 @@ function createPermanentRow() {
 
 createPermanentRow();
 
-    function createRow(columns = 2, rowIndex = savedRowCount, weekRange = getCurrentWeekRange()) {
+    export function createRow(columns = 2, rowIndex = savedRowCount, weekRange = getCurrentWeekRange()) {
     const row = document.createElement('div');
     row.classList.add('grid-row','draggable');
     row.style.display = 'grid';
@@ -399,7 +427,7 @@ function loadSavedRows() {
 
 loadSavedRows();
 
-function saveCellValue(rowIndex, colIndex, value, weekRange = getCurrentWeekRange()) {
+export function saveCellValue(rowIndex, colIndex, value, weekRange = getCurrentWeekRange()) {
     const key = `cell-${rowIndex}-${colIndex}-${weekRange}`;
     localStorage.setItem(key, value);
 }
