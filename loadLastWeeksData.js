@@ -2,7 +2,8 @@ import {
     getCurrentWeekRange,
     getPreviousWeekRange,
     createRow,
-    saveCellValue
+    saveCellValue,
+    createPermanentChecklist
 } from './script.js';
 
 function normalizeWeekRange(weekRange) {
@@ -92,6 +93,7 @@ for (let colIndex = 0; colIndex < 2; colIndex++) {
 rowIndex++;
 savedRowCount++;
 rowsLoaded++;
+createPermanentChecklist();
     }
 
     if (rowsLoaded > 0) {

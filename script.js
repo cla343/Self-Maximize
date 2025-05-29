@@ -487,7 +487,7 @@ if (savedFocus) {
     input.innerText = savedFocus;
 }
 
-function createPermanentChecklist() {
+export function createPermanentChecklist() {
     const habitTracker = document.querySelector('.habit-tracker');
     if (!habitTracker) return;
 
@@ -697,6 +697,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function applyDarkModeStyles(isDarkMode) {
     document.querySelectorAll('.grid-row').forEach(row => {
         row.style.backgroundColor = isDarkMode ? 'black' : '#fff';
+    });
+
+    document.querySelectorAll('.calendar-popup').forEach(popup => {
+        if (isDarkMode) {
+            popup.style.background = '#333';
+            popup.style.color = '#fff';
+        } else {
+            popup.style.background = 'white';
+            popup.style.color = '#000';
+        }
     });
 
     document.querySelectorAll('.grid-header').forEach(header => {

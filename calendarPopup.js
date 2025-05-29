@@ -5,7 +5,6 @@ export function createCalendarPopup(onDateSelect) {
     popup.style.top = '60px';
     popup.style.left = '50%';
     popup.style.transform = 'translateX(-50%)';
-    popup.style.background = 'white';
     popup.style.border = '1px solid #ccc';
     popup.style.padding = '10px';
     popup.style.borderRadius = '10px';
