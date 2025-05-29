@@ -23,18 +23,21 @@ export function getCurrentWeekRange(date = new Date()) {
 
 export function getPreviousWeekRange() {
     const now = new Date();
-    const startOfThisWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-    const startOfLastWeek = new Date(startOfThisWeek);
-    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const currentDay = now.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
+    const daysSinceMonday = (currentDay + 6) % 7;
+  
+    const startOfLastWeek = new Date(now);
+    startOfLastWeek.setDate(now.getDate() - daysSinceMonday - 7); // Go to previous Monday
   
     const endOfLastWeek = new Date(startOfLastWeek);
-    endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
+    endOfLastWeek.setDate(startOfLastWeek.getDate() + 6); // Following Sunday
   
     const startStr = startOfLastWeek.toISOString().split('T')[0];
     const endStr = endOfLastWeek.toISOString().split('T')[0];
   
     return `${startStr}_to_${endStr}`;
-  }  
+  }
+  
 
 const lastWeek = localStorage.getItem('lastWeek') || getCurrentWeekRange();
 const week = document.querySelector('.week');

@@ -12,24 +12,44 @@ function normalizeWeekRange(weekRange) {
 }
 
 export function loadLastWeeksData() {
+    const lastWeek = localStorage.getItem('lastWeek');
+    console.log('lastWeek:', lastWeek);
+
     const areaHeader = document.querySelector('.area-cell');
     const goalHeader = document.querySelector('.goal-cell');
+
+    // Make sure you declare before use
+    if (!areaHeader || !goalHeader) {
+        console.warn('Area or Goal header not found');
+        return;
+    }
 
     const currentWeek = getCurrentWeekRange();
     const savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${currentWeek}`)) || 0;
 
     if (savedRowCount > 0) return;
+    console.log(savedRowCount, 'savedRowCount for current week'); 
 
     const setupHoverAndClick = (headerEl, label) => {
         headerEl.style.cursor = 'pointer';
-        headerEl.addEventListener('mouseenter', () => headerEl.style.color = 'blue');
-        headerEl.addEventListener('mouseleave', () => headerEl.style.color = '');
-
+    
+        headerEl.addEventListener('mouseenter', () => {
+            console.log('mouseenter on', headerEl);
+            headerEl.style.color = 'blue';
+        });
+    
+        headerEl.addEventListener('mouseleave', () => {
+            console.log('mouseleave on', headerEl);
+            headerEl.style.color = '';
+        });
+    
         headerEl.addEventListener('click', () => {
+            console.log('clicked on', headerEl);
             const confirmLoad = confirm(`Load last week's Area + Goal inputs?`);
             if (confirmLoad) loadPreviousWeekData();
         });
     };
+    
 
     setupHoverAndClick(areaHeader, 'area + goal');
     setupHoverAndClick(goalHeader, 'area + goal');
@@ -40,9 +60,15 @@ function loadPreviousWeekData() {
     let previousWeek = getPreviousWeekRange();
     previousWeek = normalizeWeekRange(previousWeek);  // Normalize previous week format here
 
+    console.log('Normalized previousWeek:', previousWeek);
+    console.log('Raw previousWeek:', getPreviousWeekRange());
+    console.log('Normalized previousWeek:', previousWeek);
+
     let savedRowCount = 0;
     let rowIndex = 0;
     let rowsLoaded = 0;
+
+    console.log('Trying to load from previousWeek:', previousWeek);
 
     while (true) {
         const area = localStorage.getItem(`cell-${rowIndex}-0-${previousWeek}`);
