@@ -78,12 +78,20 @@ function loadPreviousWeekData() {
 
         createRow(2, savedRowCount, currentWeek);
 
-        if (area !== null) saveCellValue(savedRowCount, 0, area, currentWeek);
-        if (goal !== null) saveCellValue(savedRowCount, 1, goal, currentWeek);
-
-        savedRowCount++;
-        rowsLoaded++;
-        rowIndex++;
+        // Copy previous week values into the new week
+for (let colIndex = 0; colIndex < 2; colIndex++) {
+    const prevValue = localStorage.getItem(`cell-${rowIndex}-${colIndex}-${previousWeek}`);
+    if (prevValue !== null) {
+        saveCellValue(savedRowCount, colIndex, prevValue, currentWeek);
+        // Also update the contentEditable divs that were just created
+        const cellKey = `cell-${savedRowCount}-${colIndex}-${currentWeek}`;
+        const editDiv = document.querySelector(`[data-key="${cellKey}"]`);
+        if (editDiv) editDiv.innerText = prevValue;
+    }
+}
+rowIndex++;
+savedRowCount++;
+rowsLoaded++;
     }
 
     if (rowsLoaded > 0) {
