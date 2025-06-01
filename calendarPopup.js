@@ -2,6 +2,7 @@ export function createCalendarPopup(onDateSelect) {
     const popup = document.createElement('div');
     popup.className = 'calendar-popup';
     popup.style.position = 'absolute';
+    popup.style.background = 'white';
     popup.style.top = '60px';
     popup.style.left = '50%';
     popup.style.transform = 'translateX(-50%)';
