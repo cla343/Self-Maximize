@@ -1,5 +1,6 @@
 import { createCalendarPopup } from './calendarPopup.js';
 import { loadLastWeeksData } from './loadLastWeeksData.js';
+import { loadLastWeeksNotes } from './loadLastWeeksNotes.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!document.querySelector('.grid-header')) {
