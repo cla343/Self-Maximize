@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createPermanentRow();
       }
     loadLastWeeksData();
+    loadLastWeeksNotes();
     bindCalendarEmojiEvents();
 });
 

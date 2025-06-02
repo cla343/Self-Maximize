@@ -13,8 +13,9 @@ function normalizeWeekRange(weekRange) {
 }
 
 export function loadLastWeeksData() {
-    const lastWeek = localStorage.getItem('lastWeek');
-    console.log('lastWeek:', lastWeek);
+    const lastWeek = normalizeWeekRange(getPreviousWeekRange());
+    console.log('Calculated lastWeek:', lastWeek);
+
 
     const areaHeader = document.querySelector('.area-cell');
     const goalHeader = document.querySelector('.goal-cell');
@@ -64,6 +65,7 @@ function loadPreviousWeekData() {
     console.log('Normalized previousWeek:', previousWeek);
     console.log('Raw previousWeek:', getPreviousWeekRange());
     console.log('Normalized previousWeek:', previousWeek);
+    console.log('🧪 getPreviousWeekRange() returned:', previousWeek);
 
     let savedRowCount = 0;
     let rowIndex = 0;
