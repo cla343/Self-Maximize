@@ -4,9 +4,12 @@ import { loadLastWeeksNotes } from './loadLastWeeksNotes.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!document.querySelector('.grid-header')) {
-        createPermanentRow();
-      }
-    loadLastWeeksData();
+        createPermanentRow(); // This creates .area-cell and .goal-cell
+        loadLastWeeksData();  // ✅ Call this *right after* creating headers
+    } else {
+        loadLastWeeksData();  // ✅ If grid already exists, still load
+    }
+
     loadLastWeeksNotes();
     bindCalendarEmojiEvents();
 });
