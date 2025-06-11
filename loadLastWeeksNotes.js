@@ -39,9 +39,22 @@ export function loadLastWeeksNotes() {
     
         headerEl.addEventListener('click', () => {
             console.log('clicked on', headerEl);
+            const notesInput = document.querySelector('.notes-input');
+            const currentWeek = getCurrentWeekRange();
+            const currentVal = localStorage.getItem(`weeklyNotes-${currentWeek}`);
+        
+            if (currentVal && currentVal.trim()) {
+                alert("This week's notes already exist and won't be overwritten.");
+                return;
+            }
+        
             const confirmLoad = confirm(`Load last week's Notes inputs?`);
-            if (confirmLoad) loadPreviousWeekData();
+            if (confirmLoad) {
+                loadPreviousWeekData();
+                alert("✅ Last week's notes loaded into this week.");
+            }
         });
+        
     };
     
 

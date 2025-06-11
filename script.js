@@ -28,20 +28,21 @@ export function getCurrentWeekRange(date = new Date()) {
 
 export function getPreviousWeekRange() {
     const now = new Date();
-    const currentDay = now.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
-    const daysSinceMonday = (currentDay + 6) % 7;
-  
+    const dayIndex = now.getDay();
+    const daysToMonday = dayIndex === 0 ? 6 : dayIndex - 1;
+
     const startOfLastWeek = new Date(now);
-    startOfLastWeek.setDate(now.getDate() - daysSinceMonday - 7); // Go to previous Monday
-  
+    startOfLastWeek.setDate(now.getDate() - daysToMonday - 7);
+
     const endOfLastWeek = new Date(startOfLastWeek);
-    endOfLastWeek.setDate(startOfLastWeek.getDate() + 6); // Following Sunday
-  
-    const startStr = startOfLastWeek.toISOString().split('T')[0];
-    const endStr = endOfLastWeek.toISOString().split('T')[0];
-  
-    return `${startStr}_to_${endStr}`;
-  }
+    endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
+
+    const startStr = startOfLastWeek.toLocaleDateString('en-CA');
+    const endStr = endOfLastWeek.toLocaleDateString('en-CA');
+
+    return `${startStr} - ${endStr}`;
+}
+
   
 
 const lastWeek = localStorage.getItem('lastWeek') || getCurrentWeekRange();
@@ -114,10 +115,22 @@ weekTogglePrevious.onclick = () => {
     loadWeekData(previousWeek);
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
     localStorage.setItem('lastWeek', previousWeek);
-    renderGridForWeek(previousWeek);  // refresh the grid for the newly selected week
+    renderGridForWeek(previousWeek);
     console.log("Grid rendered. Is emptyCell found?", document.querySelector('.emptyCell'));
 
-    loadLastWeeksData(previousWeek); 
+    // Replace notesInput with a fresh version and update its content
+    let newNotesInput = notesInput.cloneNode(true);
+    newNotesInput.innerText = localStorage.getItem(`weeklyNotes-${previousWeek}`) || '';
+    notesInput.replaceWith(newNotesInput);
+    notesInput = newNotesInput; // 🔥 IMPORTANT: reassign the reference
+    console.log("New notesInput created:", notesInput);
+    // Add correct listener for this week's notes
+    notesInput.addEventListener('input', () => {
+        localStorage.setItem(`weeklyNotes-${previousWeek}`, notesInput.innerText);
+    });
+
+    loadLastWeeksData(previousWeek);
+    loadNotesForWeek(previousWeek);
     bindCalendarEmojiEvents();
 };
 
@@ -128,14 +141,29 @@ weekToggleNext.onclick = () => {
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${nextWeek}`;
     localStorage.setItem('lastWeek', nextWeek);
     loadWeekData(nextWeek);
-    renderGridForWeek(nextWeek);  // refresh the grid for the newly selected week
+    renderGridForWeek(nextWeek);
     console.log("Grid rendered. Is emptyCell found?", document.querySelector('.emptyCell'));
 
-    loadLastWeeksData(nextWeek); 
+    // Replace notesInput and rebind for correct week
+    let newNotesInput = notesInput.cloneNode(true);
+    newNotesInput.innerText = localStorage.getItem(`weeklyNotes-${nextWeek}`) || '';
+    notesInput.replaceWith(newNotesInput);
+    notesInput = newNotesInput; // 🔥 Reassign reference
+console.log("New notesInput created:", notesInput);
+    notesInput.addEventListener('input', () => {
+        localStorage.setItem(`weeklyNotes-${nextWeek}`, notesInput.innerText);
+    });
+
+    loadLastWeeksData(nextWeek);
+    loadNotesForWeek(nextWeek);
     bindCalendarEmojiEvents();
 };
 
+
 function loadWeekData(weekRange) {
+    console.log('🔄 Loading data for weekRange:', weekRange); 
+    console.log('🚨 About to call loadWeekData with:', weekRange);
+   
     input.innerText = localStorage.getItem(`primaryFocus-${weekRange}`) || '';
     notesInput.innerText = localStorage.getItem(`weeklyNotes-${weekRange}`) || '';
     const weekReview = document.querySelector('.recap');
@@ -160,6 +188,17 @@ function loadWeekData(weekRange) {
 savedRowCount = rowCount;
 createPermanentChecklist();
 }
+
+function loadNotesForWeek(weekRange) {
+    areaInputs.forEach((input, index) => {
+        const notesInput = document.querySelectorAll('.notes-input')[index];
+        if (notesInput) {
+            const savedNotes = localStorage.getItem(`notes-${index}-${weekRange}`) || '';
+            notesInput.innerText = savedNotes;
+        }
+    });
+}
+
 // Bind events to the calendar emoji
 const calendarEmoji = weekText.querySelector('.calendar-emoji');
 calendarEmoji.onmouseenter = () => calendarEmoji.style.color = 'blue';
@@ -204,9 +243,10 @@ week.appendChild(weekContainer);
 const focus = document.querySelector('.primary-focus');
 focus.innerHTML = '<span>🎯 Primary Focus:</span> <div class="focus-input" contenteditable="true"></div>';
 const input = document.querySelector('.focus-input');
+
 input.addEventListener('input', () => {
-    const currentWeek = weekText.textContent;
-    localStorage.setItem(`primaryFocus-${currentWeek}`, input.innerText);
+    const weekRange = weekText.textContent.replace('📅 ', '').trim();
+    localStorage.setItem(`primaryFocus-${weekRange}`, input.innerText);
 });
 focus.style.justifyContent = 'center';
 
@@ -218,14 +258,18 @@ notesHeader.querySelector('span').style.fontWeight = 'bold';
 notesHeader.style.marginTop = '50px'; // Adjust the value as needed
 notesHeader.style.marginBottom = '30px'; // Adjust the value as needed
 
-const notesInput = document.createElement('div');
+let notesInput = document.createElement('div');
 notesInput.classList.add('notes-input');
 notesInput.contentEditable = 'true';
-const currentWeekRange =  getCurrentWeekRange();
-notesInput.innerText = localStorage.getItem(`weeklyNotes-${currentWeekRange}`) || '';
+
+const staticWeekRange = weekText.textContent.replace('📅 ', '').trim();  // declare once
+
+// Load notes for this specific week
+notesInput.innerText = localStorage.getItem(`weeklyNotes-${staticWeekRange}`) || '';
+
+// Save notes using the captured week
 notesInput.addEventListener('input', () => {
-    const weekRange = getCurrentWeekRange();
-    localStorage.setItem(`weeklyNotes-${weekRange}`, notesInput.innerText);
+    localStorage.setItem(`weeklyNotes-${staticWeekRange}`, notesInput.innerText);
 });
 
 const container = document.createElement('div');
@@ -460,6 +504,7 @@ addRowButton.style.borderRadius = '5px';
 addRowButton.style.padding = '5px 17.5px';
 addRowButton.onclick = () => {
     const weekRange = getCurrentWeekRange();
+    let savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`)) || 0;
     createRow(2, savedRowCount, weekRange);
     savedRowCount++;
     localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
@@ -587,13 +632,20 @@ areaInputs.forEach((input, index) => {
     notesInput.contentEditable = 'true';
 
     // Load stored notes for this area
-    const currentWeekRange = getCurrentWeekRange();
-    notesInput.innerText = localStorage.getItem(`notes-${index}-${currentWeekRange}`) || '';
+    const currentWeekRange = document.querySelector('.week-display')?.textContent?.trim() || getCurrentWeekRange();
+    console.log(`[🟢 Load] Notes for Area ${index} | Week: ${currentWeekRange}`);
+    console.log('getCurrentWeekRange returns:', getCurrentWeekRange());
 
-    // Save notes when edited
+    notesInput.innerText = localStorage.getItem(`notes-${index}-${currentWeekRange}`) || '';
+    
     notesInput.addEventListener('input', () => {
-        localStorage.setItem(`notes-${index}-${currentWeekRange}`, notesInput.innerText);
-    });
+        const activeWeekRange = document.querySelector('.week-display')?.textContent?.trim() || getCurrentWeekRange();
+        console.log(`[📝 Save] Notes for Area ${index} | Week: ${activeWeekRange}`);
+        console.log('getCurrentWeekRange returns:', getCurrentWeekRange());
+        console.log('Creating notes input for week:', activeWeekRange, 'area:', index, 'element:', notesInput);
+
+        localStorage.setItem(`notes-${index}-${activeWeekRange}`, notesInput.innerText);
+    });    
 
     notesSection.appendChild(notesLabel);
     notesSection.appendChild(notesInput);
@@ -779,3 +831,4 @@ const savedMode = localStorage.getItem('darkMode') === 'true';
 applyDarkModeStyles(savedMode); // Apply saved mode on page load
 
 loadWeekData(lastWeek);
+loadNotesForWeek(lastWeek);

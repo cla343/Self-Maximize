@@ -74,9 +74,6 @@ function loadPreviousWeekData() {
     console.log('Trying to load from previousWeek:', previousWeek);
 
     while (true) {
-        console.log('areaCell element found:', document.querySelector('.area-cell'));
-console.log('goalCell element found:', document.querySelector('.goal-cell'));
-
         const area = localStorage.getItem(`cell-${rowIndex}-0-${previousWeek}`);
         const goal = localStorage.getItem(`cell-${rowIndex}-1-${previousWeek}`);
 
