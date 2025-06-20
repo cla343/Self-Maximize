@@ -4,11 +4,6 @@ import {
     createPermanentChecklist
 } from './script.js';
 
-function getDisplayedWeek() {
-    const raw = document.querySelector('.week-text')?.textContent || '';
-    return raw.replace('📅 ', '').trim();
-}
-
 function getPreviousWeekFrom(weekRange) {
     const startStr = weekRange.split(' - ')[0];
     const [year, month, day] = startStr.split('-').map(Number);

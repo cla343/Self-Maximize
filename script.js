@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     bindCalendarEmojiEvents();
 });
 
+function getDisplayedWeek() {
+    const raw = document.querySelector('.week-text')?.textContent || '';
+    return raw.replace('📅 ', '').trim();
+}
+
 export function getCurrentWeekRange(date = new Date()) {
     let dayIndex = date.getDay();
     let daysToMonday = dayIndex === 1 ? 0 : (dayIndex === 0 ? 6 : dayIndex - 1);
@@ -272,7 +277,7 @@ function createPermanentRow() {
     addRowButton.style.padding = '5px 17.5px';
 
     addRowButton.addEventListener('click', () => {
-        const weekRange = getCurrentWeekRange();
+        const weekRange = getDisplayedWeek();
         let savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`)) || 0;
         createRow(2, savedRowCount, weekRange);
         savedRowCount++;
@@ -289,7 +294,7 @@ function createPermanentRow() {
 
 createPermanentRow();
 
-    export function createRow(columns = 2, rowIndex = savedRowCount, weekRange = getCurrentWeekRange()) {
+    export function createRow(columns = 2, rowIndex = savedRowCount, weekRange = getDisplayedWeek()) {
     const row = document.createElement('div');
     row.classList.add('grid-row','draggable');
     row.style.display = 'grid';
@@ -383,7 +388,7 @@ createPermanentRow();
     container.appendChild(row);
 }
 
-const weekRange = getCurrentWeekRange();
+const weekRange = getDisplayedWeek();
 let savedRowCount = localStorage.getItem(`savedRowCount-${weekRange}`);
 if (savedRowCount === null) {
     savedRowCount = 0;
@@ -393,7 +398,7 @@ if (savedRowCount === null) {
 }
 
 function updateRowIndices() {
-    const weekRange = getCurrentWeekRange(); 
+    const weekRange = getDisplayedWeek(); 
     const rows = container.querySelectorAll('.grid-row');
 
 
@@ -431,7 +436,7 @@ function updateRowIndices() {
 }
 
 function loadSavedRows() {
-    const weekRange = getCurrentWeekRange();
+    const weekRange = getDisplayedWeek();
     const savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`)) || 0;
     container.innerHTML = '';
     createPermanentRow();
@@ -442,17 +447,17 @@ function loadSavedRows() {
 
 loadSavedRows();
 
-export function saveCellValue(rowIndex, colIndex, value, weekRange = getCurrentWeekRange()) {
+export function saveCellValue(rowIndex, colIndex, value, weekRange = getDisplayedWeek()) {
     const key = `cell-${rowIndex}-${colIndex}-${weekRange}`;
     localStorage.setItem(key, value);
 }
 
-function getSavedCellValue(row, col, weekRange = getCurrentWeekRange()) {
+function getSavedCellValue(row, col, weekRange = getDisplayedWeek()) {
     const key = `cell-${row}-${col}-${weekRange}`;
     return localStorage.getItem(key) || '';
 }
 
-function removeRowFromStorage(rowIndex, weekRange = getCurrentWeekRange()) {
+function removeRowFromStorage(rowIndex, weekRange = getDisplayedWeek()) {
     const colCount = 2;
     for (let col = 0; col < colCount; col++) {
         const key = `cell-${rowIndex}-${col}-${weekRange}`;
@@ -474,7 +479,7 @@ addRowButton.style.cursor = 'pointer';
 addRowButton.style.borderRadius = '5px';
 addRowButton.style.padding = '5px 17.5px';
 addRowButton.onclick = () => {
-    const weekRange = getCurrentWeekRange();
+    const weekRange = getDisplayedWeek();
     let savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`)) || 0;
     createRow(2, savedRowCount, weekRange);
     savedRowCount++;
@@ -482,7 +487,7 @@ addRowButton.onclick = () => {
     createPermanentChecklist();
 };
 
-const currentWeek = getCurrentWeekRange();
+const currentWeek = getDisplayedWeek();
 
 if (currentWeek !== lastWeek) {
     Object.keys(localStorage).forEach(key => {
