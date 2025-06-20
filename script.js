@@ -52,6 +52,7 @@ weekContainer.style.display = 'flex';
 weekContainer.style.justifyContent = 'center';
 weekContainer.style.alignItems = 'center';
 const weekText = document.createElement('span');
+weekText.classList.add('week-text');
 weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${lastWeek}`;
 weekText.style.margin = '0 10px';
 weekText.style.fontWeight = 'bold';
@@ -76,59 +77,16 @@ function getStartDateFromWeekText(weekTextContent) {
     return new Date(parts[0], parts[1] - 1, parts[2]);
 }
 
-function renderGridForWeek(weekRange) {
-    console.log("Rendering grid for:", weekRange);
-
-    // Find the existing emptyCell in the header
-    const emptyCell = document.querySelector('.grid-header .emptyCell');
-    if (!emptyCell) {
-        console.error("emptyCell not found!");
-        return;
-    }
-
-    // Clear the emptyCell content first (optional, to prevent duplicates)
-    emptyCell.innerHTML = '';
-
-    // Add the Add Row button if it doesn’t already exist
-    const addRowButton = document.querySelector('.addRowButton');
-    if (!addRowButton) {
-        const newAddRowButton = document.createElement('button');
-        newAddRowButton.classList.add('addRowButton');
-        newAddRowButton.innerText = 'Add Row';
-        newAddRowButton.style.backgroundColor = 'green';
-        newAddRowButton.style.color = 'white';
-        newAddRowButton.style.border = 'none';
-        newAddRowButton.style.cursor = 'pointer';
-        newAddRowButton.style.borderRadius = '5px';
-        newAddRowButton.style.padding = '5px 17.5px';
-
-        emptyCell.appendChild(newAddRowButton);
-    }
-
-    console.log("Grid rendered. Is emptyCell found?", emptyCell);
-}
-
 weekTogglePrevious.onclick = () => {
     let currentStartDate = getStartDateFromWeekText(weekText.textContent);
     currentStartDate.setDate(currentStartDate.getDate() - 7);
     let previousWeek = getCurrentWeekRange(currentStartDate);
-    loadWeekData(previousWeek);
+
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
     localStorage.setItem('lastWeek', previousWeek);
-    renderGridForWeek(previousWeek);
-    console.log("Grid rendered. Is emptyCell found?", document.querySelector('.emptyCell'));
 
-    // Replace notesInput with a fresh version and update its content
-    let newNotesInput = notesInput.cloneNode(true);
-    newNotesInput.innerText = localStorage.getItem(`weeklyNotes-${previousWeek}`) || '';
-    notesInput.replaceWith(newNotesInput);
-    notesInput = newNotesInput; // 🔥 IMPORTANT: reassign the reference
-    console.log("New notesInput created:", notesInput);
-    // Add correct listener for this week's notes
-    notesInput.addEventListener('input', () => {
-        localStorage.setItem(`weeklyNotes-${previousWeek}`, notesInput.innerText);
-    });
-
+    // Update grid and data
+    loadWeekData(previousWeek);
     loadLastWeeksData(previousWeek);
     loadNotesForWeek(previousWeek);
     bindCalendarEmojiEvents();
@@ -138,27 +96,15 @@ weekToggleNext.onclick = () => {
     let currentStartDate = getStartDateFromWeekText(weekText.textContent);
     currentStartDate.setDate(currentStartDate.getDate() + 7);
     let nextWeek = getCurrentWeekRange(currentStartDate);
+
     weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${nextWeek}`;
     localStorage.setItem('lastWeek', nextWeek);
+
     loadWeekData(nextWeek);
-    renderGridForWeek(nextWeek);
-    console.log("Grid rendered. Is emptyCell found?", document.querySelector('.emptyCell'));
-
-    // Replace notesInput and rebind for correct week
-    let newNotesInput = notesInput.cloneNode(true);
-    newNotesInput.innerText = localStorage.getItem(`weeklyNotes-${nextWeek}`) || '';
-    notesInput.replaceWith(newNotesInput);
-    notesInput = newNotesInput; // 🔥 Reassign reference
-console.log("New notesInput created:", notesInput);
-    notesInput.addEventListener('input', () => {
-        localStorage.setItem(`weeklyNotes-${nextWeek}`, notesInput.innerText);
-    });
-
     loadLastWeeksData(nextWeek);
     loadNotesForWeek(nextWeek);
     bindCalendarEmojiEvents();
 };
-
 
 function loadWeekData(weekRange) {
     console.log('🔄 Loading data for weekRange:', weekRange); 
@@ -190,6 +136,7 @@ createPermanentChecklist();
 }
 
 function loadNotesForWeek(weekRange) {
+    const areaInputs = document.querySelectorAll('.area-input'); // or the correct selector for your area inputs
     areaInputs.forEach((input, index) => {
         const notesInput = document.querySelectorAll('.notes-input')[index];
         if (notesInput) {
@@ -289,32 +236,52 @@ function createPermanentRow() {
     areaCell.classList.add('area-cell');
     areaCell.style.padding = '10px';
     areaCell.style.textAlign = 'center';
-    row.appendChild(areaCell);
     areaCell.style.border = '1px solid lightgrey';
     areaCell.style.backgroundColor = '#f0f0f0';
-
+    row.appendChild(areaCell);
 
     const goalCell = document.createElement('div');
     goalCell.innerText = 'Goal';
     goalCell.classList.add('goal-cell');
     goalCell.style.padding = '10px';
     goalCell.style.textAlign = 'center';
-    row.appendChild(goalCell);
     goalCell.style.border = '1px solid lightgrey';
     goalCell.style.backgroundColor = '#f0f0f0';
-
+    row.appendChild(goalCell);
 
     const emptyCell = document.createElement('div');
-    emptyCell.innerText = '';
     emptyCell.classList.add('emptyCell');
     emptyCell.style.textAlign = 'center';
     emptyCell.style.display = 'flex';
     emptyCell.style.justifyContent = 'center';
     emptyCell.style.alignItems = 'center';
+
+    // Create and append Add Row button here
+    const addRowButton = document.createElement('button');
+    addRowButton.classList.add('addRowButton');
+    addRowButton.innerText = 'Add Row';
+    addRowButton.style.backgroundColor = 'green';
+    addRowButton.style.color = 'white';
+    addRowButton.style.border = 'none';
+    addRowButton.style.cursor = 'pointer';
+    addRowButton.style.borderRadius = '5px';
+    addRowButton.style.padding = '5px 17.5px';
+
+    addRowButton.addEventListener('click', () => {
+        const weekRange = getCurrentWeekRange();
+        let savedRowCount = parseInt(localStorage.getItem(`savedRowCount-${weekRange}`)) || 0;
+        createRow(2, savedRowCount, weekRange);
+        savedRowCount++;
+        localStorage.setItem(`savedRowCount-${weekRange}`, savedRowCount);
+        createPermanentChecklist();
+    });
+
+    emptyCell.appendChild(addRowButton);
     row.appendChild(emptyCell);
 
     container.appendChild(row);
 }
+
 
 createPermanentRow();
 
@@ -511,14 +478,6 @@ addRowButton.onclick = () => {
     createPermanentChecklist();
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-const emptyCell = document.querySelector('.emptyCell');
-emptyCell.appendChild(addRowButton);
-});
-// const grid1 = document.querySelector('.grid-1');
-// buttonContainer.appendChild(addRowButton);
-// grid1.appendChild(buttonContainer);
-
 const currentWeek = getCurrentWeekRange();
 
 if (currentWeek !== lastWeek) {
@@ -631,22 +590,23 @@ areaInputs.forEach((input, index) => {
     notesInput.classList.add('notes-input');
     notesInput.contentEditable = 'true';
 
-    // Load stored notes for this area
-    const currentWeekRange = document.querySelector('.week-display')?.textContent?.trim() || getCurrentWeekRange();
-    console.log(`[🟢 Load] Notes for Area ${index} | Week: ${currentWeekRange}`);
-    console.log('getCurrentWeekRange returns:', getCurrentWeekRange());
-
-    notesInput.innerText = localStorage.getItem(`notes-${index}-${currentWeekRange}`) || '';
+    function getCleanedWeekText() {
+        return weekText.textContent.replace('📅', '').trim();
+    }
     
+    // Load stored notes for this area
+    const currentWeek = getCleanedWeekText();
+    console.log(`[🟢 Load] Notes for Area ${index} | Week: ${currentWeek}`);
+    notesInput.innerText = localStorage.getItem(`notes-${index}-${currentWeek}`) || '';
+    
+    // Save notes when input changes
     notesInput.addEventListener('input', () => {
-        const activeWeekRange = document.querySelector('.week-display')?.textContent?.trim() || getCurrentWeekRange();
+        const activeWeekRange = getCleanedWeekText();
         console.log(`[📝 Save] Notes for Area ${index} | Week: ${activeWeekRange}`);
-        console.log('getCurrentWeekRange returns:', getCurrentWeekRange());
         console.log('Creating notes input for week:', activeWeekRange, 'area:', index, 'element:', notesInput);
-
         localStorage.setItem(`notes-${index}-${activeWeekRange}`, notesInput.innerText);
-    });    
-
+    });
+    
     notesSection.appendChild(notesLabel);
     notesSection.appendChild(notesInput);
     notesContent.appendChild(notesSection); // Append to wrapper instead of main container
