@@ -82,7 +82,9 @@ weekTogglePrevious.onclick = () => {
     currentStartDate.setDate(currentStartDate.getDate() - 7);
     let previousWeek = getCurrentWeekRange(currentStartDate);
 
-    weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${previousWeek}`;
+    weekText.dataset.week = previousWeek;
+    weekText.textContent = `📅 ${previousWeek}`;
+
     localStorage.setItem('lastWeek', previousWeek);
 
     // Update grid and data
@@ -97,7 +99,9 @@ weekToggleNext.onclick = () => {
     currentStartDate.setDate(currentStartDate.getDate() + 7);
     let nextWeek = getCurrentWeekRange(currentStartDate);
 
-    weekText.innerHTML = `<span class="calendar-emoji" style="cursor:pointer;">📅</span> ${nextWeek}`;
+    weekText.dataset.week = nextWeek;
+    weekText.textContent = `📅 ${nextWeek}`;
+
     localStorage.setItem('lastWeek', nextWeek);
 
     loadWeekData(nextWeek);

@@ -1,88 +1,87 @@
-import {
-    getCurrentWeekRange,
-    getPreviousWeekRange,
-    createPermanentChecklist
-} from './script.js';
+import { createPermanentChecklist } from './script.js';
 
-function normalizeWeekRange(weekRange) {
-    // If previous week uses underscores, convert to spaces and " - "
-    // Example: "2025-05-05_to_2025-05-11" → "2025-05-05 - 2025-05-11"
-    return weekRange.replace(/_/g, ' ').replace(' to ', ' - ');
+function getDisplayedWeek() {
+    const raw = document.querySelector('.week-text')?.textContent || '';
+    return raw.replace('📅 ', '').trim();
+}
+
+function getPreviousWeekFrom(weekRange) {
+    const startStr = weekRange.split(' - ')[0];
+    const [year, month, day] = startStr.split('-').map(Number);
+    const startDate = new Date(year, month - 1, day);
+    startDate.setDate(startDate.getDate() - 7);
+
+    const previousStart = startDate.toLocaleDateString('en-CA');
+    const previousEnd = new Date(startDate);
+    previousEnd.setDate(previousEnd.getDate() + 6);
+    const previousEndStr = previousEnd.toLocaleDateString('en-CA');
+
+    return `${previousStart} - ${previousEndStr}`;
+}
+
+function getAllNoteIndicesForWeek(week) {
+    const indices = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const match = key.match(/^notes-(\d+)-(.+)$/);
+        if (match && match[2] === week) {
+            indices.push(Number(match[1]));
+        }
+    }
+    return indices.sort((a, b) => a - b);
 }
 
 export function loadLastWeeksNotes() {
-    const lastWeek = localStorage.getItem('lastWeek');
-    console.log('lastWeek:', lastWeek);
-
-    const notes = document.querySelector('.notes');
-    const notesHeader = notes.querySelector('.header');
-
-    // Make sure you declare before use
+    const notesHeader = document.querySelector('.notes .header');
     if (!notesHeader) {
-        console.warn('Notes header not found');
+        console.warn('❌ .notes .header not found');
         return;
     }
 
-    const currentWeek = getCurrentWeekRange();
-    const setupHoverAndClick = (headerEl, label) => {
-        headerEl.style.cursor = 'pointer';
-    
-        headerEl.addEventListener('mouseenter', () => {
-            console.log('mouseenter on', headerEl);
-            headerEl.style.color = 'blue';
+    // Avoid binding multiple times
+    if (notesHeader.dataset.bound === 'true') return;
+
+    notesHeader.style.cursor = 'pointer';
+
+    notesHeader.addEventListener('mouseenter', () => {
+        notesHeader.style.color = 'blue';
+    });
+
+    notesHeader.addEventListener('mouseleave', () => {
+        notesHeader.style.color = '';
+    });
+
+    notesHeader.addEventListener('click', () => {
+        const currentWeek = getDisplayedWeek();
+        const previousWeek = getPreviousWeekFrom(currentWeek);
+
+        // Check if notes already exist for current week
+        const existingIndices = getAllNoteIndicesForWeek(currentWeek);
+        if (existingIndices.length > 0) {
+            alert("🛑 This week's notes already exist and won't be overwritten.");
+            return;
+        }
+
+        // Get previous week notes indices
+        const prevIndices = getAllNoteIndicesForWeek(previousWeek);
+        if (prevIndices.length === 0) {
+            alert("⚠️ No notes found for last week.");
+            return;
+        }
+
+        prevIndices.forEach(i => {
+            const prevNote = localStorage.getItem(`notes-${i}-${previousWeek}`);
+            localStorage.setItem(`notes-${i}-${currentWeek}`, prevNote);
+
+            // Update corresponding notes input if exists
+            const noteInput = document.querySelector(`.notes-input[data-index="${i}"]`);
+            if (noteInput) noteInput.innerText = prevNote;
         });
-    
-        headerEl.addEventListener('mouseleave', () => {
-            console.log('mouseleave on', headerEl);
-            headerEl.style.color = '';
-        });
-    
-        headerEl.addEventListener('click', () => {
-            console.log('clicked on', headerEl);
-            const notesInput = document.querySelector('.notes-input');
-            const currentWeek = getCurrentWeekRange();
-            const currentVal = localStorage.getItem(`weeklyNotes-${currentWeek}`);
-        
-            if (currentVal && currentVal.trim()) {
-                alert("This week's notes already exist and won't be overwritten.");
-                return;
-            }
-        
-            const confirmLoad = confirm(`Load last week's Notes inputs?`);
-            if (confirmLoad) {
-                loadPreviousWeekData();
-                alert("✅ Last week's notes loaded into this week.");
-            }
-        });
-        
-    };
-    
 
-    setupHoverAndClick(notesHeader, 'notes');
-}
+        createPermanentChecklist();
+        alert("✅ Last week's notes loaded.");
+        console.log(`📝 Loaded notes from ${previousWeek} into ${currentWeek}`);
+    });
 
-function loadPreviousWeekData() {
-    const currentWeek = getCurrentWeekRange();
-    let previousWeek = normalizeWeekRange(getPreviousWeekRange());
-
-    console.log('Normalized previousWeek:', previousWeek);
-
-    const prevValue = localStorage.getItem(`weeklyNotes-${previousWeek}`);
-
-    if (!prevValue) {
-        console.log('⚠️ No previous week notes found');
-        return;
-    }
-
-    // Insert into DOM and localStorage
-    const notesInput = document.querySelector('.notes-input');
-    if (notesInput) {
-        notesInput.innerText = prevValue;
-        localStorage.setItem(`weeklyNotes-${currentWeek}`, prevValue);
-        console.log(`✅ Loaded notes from ${previousWeek} into ${currentWeek}`);
-    } else {
-        console.warn('⚠️ .notes-input div not found');
-    }
-
-    createPermanentChecklist();
+    notesHeader.dataset.bound = 'true';
 }
