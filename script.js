@@ -141,7 +141,7 @@ function loadWeekData(weekRange) {
 }
 
 savedRowCount = rowCount;
-createPermanentChecklist();
+createPermanentChecklist(weekRange);
 }
 
 function loadNotesForWeek(weekRange) {
@@ -505,7 +505,7 @@ if (savedFocus) {
     input.innerText = savedFocus;
 }
 
-export function createPermanentChecklist() {
+export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     const habitTracker = document.querySelector('.habit-tracker');
     if (!habitTracker) return;
 
@@ -661,7 +661,7 @@ areaInputs.forEach((input, index) => {
             checkbox.classList.add('habit-checkbox');
             checkbox.dataset.area = areaName;
             checkbox.dataset.day = day; // Add data attribute for the day
-            const key = `weekly-${currentWeek}-${index}-${day}`;
+            const key = `weekly-${weekRange}-${index}-${day}`;
             checkbox.checked = localStorage.getItem(key) === 'true';
             checkbox.addEventListener('change', (event) => {
                 const isChecked = event.target.checked;
@@ -683,8 +683,6 @@ areaInputs.forEach((input, index) => {
     habitTracker.appendChild(headChecklist);
     applyDarkModeStyles(document.body.classList.contains('dark-mode'));
 }
-
-createPermanentChecklist();
 
 document.addEventListener('DOMContentLoaded', () => {
 const weekReview = document.querySelector('.recap');
