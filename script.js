@@ -390,13 +390,23 @@ createPermanentRow();
 
 
     const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete Row';
+    deleteButton.textContent = '🗑️';
+    deleteButton.title = 'Delete Row';
+    deleteButton.style.color = 'red';
+    deleteButton.style.cursor = 'pointer';
+    deleteButton.style.fontSize = '25px';
+    deleteButton.style.background = 'none';
+    deleteButton.style.border = 'none';
+    deleteButton.onmouseenter = () => deleteButton.style.opacity = '0.7';
+    deleteButton.onmouseleave = () => deleteButton.style.opacity = '1';
+    deleteButton.style.padding = '5px 36px';
+    /*deleteButton.textContent = 'Delete Row';
     deleteButton.style.backgroundColor = 'red';
     deleteButton.style.color = 'black';
     deleteButton.style.border = 'none';
     deleteButton.style.cursor = 'pointer';
     deleteButton.style.borderRadius = '5px';
-    deleteButton.style.padding = '5px 10px';
+    */
     deleteButton.onclick = () => {
         const rowIndex = Array.from(container.children).indexOf(row); 
         container.removeChild(row);
@@ -738,19 +748,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function applyDarkModeStyles(isDarkMode) {
+export function applyDarkModeStyles(isDarkMode, calendarPopup = null) {
     document.querySelectorAll('.grid-row').forEach(row => {
         row.style.backgroundColor = isDarkMode ? 'black' : '#fff';
     });
 
-    document.querySelectorAll('.calendar-popup').forEach(popup => {
-        if (isDarkMode) {
-            popup.style.background = '#333';
-            popup.style.color = '#fff';
-        } else {
-            popup.style.background = 'white';
-            popup.style.color = '#000';
-        }
+    // ⬇ Replace old calendar styling block with new one here:
+    const popups = calendarPopup ? [calendarPopup] : document.querySelectorAll('.calendar-popup');
+    popups.forEach(popup => {
+        popup.style.background = isDarkMode ? '#333' : 'white';
+        popup.style.color = isDarkMode ? '#fff' : '#000';
     });
 
     document.querySelectorAll('.grid-header').forEach(header => {

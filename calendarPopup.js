@@ -1,3 +1,5 @@
+import { applyDarkModeStyles } from './script.js';
+
 export function createCalendarPopup(onDateSelect) {
     const popup = document.createElement('div');
     popup.className = 'calendar-popup';
@@ -12,6 +14,7 @@ export function createCalendarPopup(onDateSelect) {
     popup.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
     popup.style.zIndex = '9999';
 
+    applyDarkModeStyles(document.body.classList.contains('dark-mode'), popup);
     let selectedDate = new Date();
     renderCalendar();
 
