@@ -297,6 +297,8 @@ createPermanentRow();
     export function createRow(columns = 2, rowIndex = savedRowCount, weekRange = getDisplayedWeek()) {
     const row = document.createElement('div');
     row.classList.add('grid-row','draggable');
+    row.dataset.rowIndex = rowIndex;
+    row.dataset.rowId = rowIndex;
     row.style.display = 'grid';
     row.style.gridTemplateColumns = '.5fr 1fr auto';
     row.style.columnGap = '10px';
@@ -329,13 +331,38 @@ createPermanentRow();
             
             container.addEventListener('dragend', (e) => {
                 if (e.target.classList.contains('draggable')) {
-                    console.log("Drag ended on:", e.target);
-                    e.target.classList.remove('dragging');
-                    updateRowIndices();
-                    createPermanentChecklist();
+                  console.log("Drag ended on:", e.target);
+                  e.target.classList.remove('dragging');
+              
+                  // 1. Get the new row order
+                  const rowOrder = [...container.querySelectorAll('.grid-row')]
+                    .map(row => row.dataset.rowId);
+              
+                  // 2. Reorder the notes based on new row order
+                  const notesParent = document.querySelector('.notes-content');
+                  const notesSections = [...notesParent.querySelectorAll('.notes-section')];
+              
+                  rowOrder.forEach(rowId => {
+                    const match = notesSections.find(n => n.dataset.rowId === rowId);
+                    if (match) notesParent.appendChild(match);
+                  });
+              
+                  // 3. Log current order of notes in the DOM (only once)
+                  console.log('📦 New visual order of notes:');
+                  [...document.querySelectorAll('.notes-section')].forEach(n => {
+                    console.log(
+                      'Note for row:',
+                      n.dataset.rowId,
+                      '→',
+                      n.querySelector('.notes-input')?.innerText || ''
+                    );
+                  });
+              
+                  // 4. Final sync calls
+                  updateRowIndices();
+                  createPermanentChecklist();
                 }
-            });
-            
+              });            
 
          container.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -498,30 +525,24 @@ if (currentWeek !== lastWeek) {
     localStorage.setItem('lastWeek', currentWeek);
 }
 
-// notesHeader.appendChild(notesInput);
-
 const savedFocus = localStorage.getItem('primaryFocus');
 if (savedFocus) {
     input.innerText = savedFocus;
 }
-
 export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     const habitTracker = document.querySelector('.habit-tracker');
     if (!habitTracker) return;
 
     let habitTrackerHead = habitTracker.querySelector('.header');
-    
-    // Create the header if it doesn't exist
     if (!habitTrackerHead) {
         habitTrackerHead = document.createElement('div');
         habitTrackerHead.classList.add('header');
         habitTracker.appendChild(habitTrackerHead);
     }
 
-    //Style the header
     habitTrackerHead.innerHTML = '📊 Daily Habit Tracker';
-    habitTrackerHead.style.marginTop = '30px'; 
-    habitTrackerHead.style.marginBottom = '20px'; 
+    habitTrackerHead.style.marginTop = '30px';
+    habitTrackerHead.style.marginBottom = '20px';
     habitTrackerHead.style.fontSize = '20px';
     habitTrackerHead.style.fontWeight = 'bold';
 
@@ -530,6 +551,7 @@ export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     const existingChecklist = habitTracker.querySelector('.headChecklist');
     if (existingChecklist) existingChecklist.remove();
 
+    // Load saved area names into inputs
     const areaInputs = document.querySelectorAll('.area-input');
     areaInputs.forEach((input, index) => {
         const savedName = localStorage.getItem(`areaName-${index}`);
@@ -542,7 +564,7 @@ export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     headChecklist.style.fontWeight = 'bold';
     headChecklist.style.display = 'grid';
     headChecklist.style.gridTemplateColumns = `minmax(100px, 20%) repeat(${areaInputs.length}, 1fr)`;
-    headChecklist.style.gridTemplateRows = 'repeat(8, auto)';  
+    headChecklist.style.gridTemplateRows = 'repeat(8, auto)';
 
     const dayHead = document.createElement('div');
     dayHead.innerText = 'Day';
@@ -561,124 +583,122 @@ export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
         dayCell.style.textAlign = 'center';
         dayCell.style.border = '1px solid lightgrey';
         dayCell.style.gridColumn = '1';
-        dayCell.style.gridRow = `${rowIndex + 2}`; // Start below headers
+        dayCell.style.gridRow = `${rowIndex + 2}`;
         headChecklist.appendChild(dayCell);
+    });
+
+    console.log('Current .area-input order:');
+[...document.querySelectorAll('.area-input')].forEach((input, i) => {
+  console.log(i, input.innerText);
 });
 
-    // Create a notes section for each area
-const notesContainer = document.querySelector('.notes'); 
-notesContainer.style.display = 'flex';
-notesContainer.style.flexDirection = 'column'; // Stack header and notes
+    // Notes container setup
+    const notesContainer = document.querySelector('.notes');
+    notesContainer.style.display = 'flex';
+    notesContainer.style.flexDirection = 'column';
 
-// Create a wrapper for notes sections
-const notesContent = document.createElement('div');
-notesContent.classList.add('notes-content');
-notesContent.style.display = 'flex';
-notesContent.style.flexWrap = 'wrap';
-notesContent.style.gap = '20px';
+    const oldNotesContent = notesContainer.querySelector('.notes-content');
+    if (oldNotesContent) oldNotesContent.remove();
 
-const oldNotesContent = notesContainer.querySelector('.notes-content');
-if (oldNotesContent) oldNotesContent.remove();
-// Append the wrapper to the main notes container
-notesContainer.appendChild(notesContent);
+    const notesContent = document.createElement('div');
+    notesContent.classList.add('notes-content');
+    notesContent.style.display = 'flex';
+    notesContent.style.flexWrap = 'wrap';
+    notesContent.style.gap = '20px';
+    notesContainer.appendChild(notesContent);
 
-areaInputs.forEach((input, index) => {
-    const notesSection = document.createElement('div');
-    notesSection.classList.add('notes-section');
+    // Use reorderedInputs for consistent order based on DOM after drag/drop
+    const reorderedInputs = [...document.querySelectorAll('.area-input')];
 
-    const notesLabel = document.createElement('span');
-    notesLabel.innerText = `${input.innerText || `Area ${index + 1}`}`;
-    notesLabel.style.fontSize = '16px';
-    notesLabel.style.fontWeight = 'bold';
-    notesLabel.style.display = 'flex';
-    notesLabel.style.justifyContent = 'center';
-    notesLabel.style.alignItems = 'center';
-    notesLabel.style.marginBottom = '5px';
-
-    const notesInput = document.createElement('div');
-    notesInput.classList.add('notes-input');
-    notesInput.contentEditable = 'true';
-
-    function getCleanedWeekText() {
-        return weekText.textContent.replace('📅', '').trim();
-    }
+    // Create notes sections aligned with reorderedInputs
+    reorderedInputs.forEach((input, visualIndex) => {
+        const rowId = input.closest('.grid-row')?.dataset.rowId || visualIndex;
     
-    // Load stored notes for this area
-    const currentWeek = getCleanedWeekText();
-    console.log(`[🟢 Load] Notes for Area ${index} | Week: ${currentWeek}`);
-    notesInput.innerText = localStorage.getItem(`notes-${index}-${currentWeek}`) || '';
+        const notesSection = document.createElement('div');
+        notesSection.classList.add('notes-section');
+        notesSection.dataset.rowId = rowId;
     
-    // Save notes when input changes
-    notesInput.addEventListener('input', () => {
-        const activeWeekRange = getCleanedWeekText();
-        console.log(`[📝 Save] Notes for Area ${index} | Week: ${activeWeekRange}`);
-        console.log('Creating notes input for week:', activeWeekRange, 'area:', index, 'element:', notesInput);
-        localStorage.setItem(`notes-${index}-${activeWeekRange}`, notesInput.innerText);
+        const notesLabel = document.createElement('span');
+        notesLabel.innerText = input.innerText || `Area ${Number(rowId) + 1}`;
+        notesLabel.style.fontSize = '16px';
+        notesLabel.style.fontWeight = 'bold';
+        notesLabel.style.display = 'flex';
+        notesLabel.style.justifyContent = 'center';
+        notesLabel.style.alignItems = 'center';
+        notesLabel.style.marginBottom = '5px';
+    
+        const notesInput = document.createElement('div');
+        notesInput.classList.add('notes-input');
+        notesInput.contentEditable = 'true';
+    
+        const currentWeek = weekRange;
+        const key = `notes-${rowId}-${currentWeek}`;
+        notesInput.innerText = localStorage.getItem(key) || '';
+    
+        notesInput.addEventListener('input', () => {
+            localStorage.setItem(key, notesInput.innerText);
+        });
+    
+        notesSection.appendChild(notesLabel);
+        notesSection.appendChild(notesInput);
+        notesContent.appendChild(notesSection);
+    
+        input.addEventListener('input', () => {
+            localStorage.setItem(`areaName-${rowId}`, input.innerText.trim());
+            notesLabel.innerText = input.innerText.trim() || `Area ${Number(rowId) + 1}`;
+        });
     });
     
-    notesSection.appendChild(notesLabel);
-    notesSection.appendChild(notesInput);
-    notesContent.appendChild(notesSection); // Append to wrapper instead of main container
-
-    // Update header dynamically if area name changes
-    input.addEventListener('input', () => {
-        localStorage.setItem(`areaName-${index}`, input.innerText.trim());
-        notesLabel.innerText = `${input.innerText.trim() || `Area ${index + 1}`}`;
-    });
-});
-
-    areaInputs.forEach((input, index) => {
+    // Create checklist headers aligned with reorderedInputs
+    reorderedInputs.forEach((input, visualIndex) => {
+        const rowId = input.closest('.grid-row')?.dataset.rowId || visualIndex;
+    
         const header = document.createElement('div');
-        header.innerText = input.innerText || 'New Area';
+        header.innerText = input.innerText || `New Area ${Number(rowId) + 1}`;
         header.style.padding = '10px';
         header.style.textAlign = 'center';
         header.style.border = '1px solid lightgrey';
-        header.style.gridRow = '1'; // Make sure it's on the first row
-        header.style.gridColumn = `${index + 2}`; 
+        header.style.gridRow = '1';
+        header.style.gridColumn = `${visualIndex + 2}`;
         headChecklist.appendChild(header);
-
+    
         input.addEventListener('input', () => {
-            const areaIndex = index;
-            localStorage.setItem(`areaName-${areaIndex}`, input.innerText);
-            header.innerText = input.innerText || 'New Area';
+            localStorage.setItem(`areaName-${rowId}`, input.innerText);
+            header.innerText = input.innerText || `New Area ${Number(rowId) + 1}`;
         });
     });
+    
 
-    areaInputs.forEach((input, index) => {
-        const areaName = input.innerText || `New Area ${index + 1}`;
-        // Loop through days and create checkboxes for each areaInput
+    reorderedInputs.forEach((input, visualIndex) => {
+        const rowId = input.closest('.grid-row')?.dataset.rowId || visualIndex;
+        const areaName = input.innerText || `New Area ${Number(rowId) + 1}`;
+    
         daysArray.forEach((day, rowIndex) => {
             const checkboxCell = document.createElement('div');
             checkboxCell.style.padding = '10px';
             checkboxCell.style.textAlign = 'center';
             checkboxCell.style.border = '1px solid lightgrey';
             checkboxCell.style.gridRow = `${rowIndex + 2}`;
-            checkboxCell.style.gridColumn = `${index + 2}`;
-
-            // Create a checkbox input
+            checkboxCell.style.gridColumn = `${visualIndex + 2}`;
+    
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.classList.add('habit-checkbox');
             checkbox.dataset.area = areaName;
-            checkbox.dataset.day = day; // Add data attribute for the day
-            const key = `weekly-${weekRange}-${index}-${day}`;
+            checkbox.dataset.day = day;
+    
+            const key = `weekly-${weekRange}-${rowId}-${day}`;
             checkbox.checked = localStorage.getItem(key) === 'true';
             checkbox.addEventListener('change', (event) => {
                 const isChecked = event.target.checked;
                 localStorage.setItem(key, isChecked);
             });
-
-            const date = new Date();
-            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-            const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
-            const weekNumber = Math.ceil((days + 1) / 7);
-
-            // Append checkbox to the cell
+    
             checkboxCell.appendChild(checkbox);
             headChecklist.appendChild(checkboxCell);
-
         });
     });
+    
 
     habitTracker.appendChild(headChecklist);
     applyDarkModeStyles(document.body.classList.contains('dark-mode'));
