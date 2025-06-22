@@ -209,10 +209,10 @@ focus.style.justifyContent = 'center';
 const notes = document.querySelector('.notes');
 const notesHeader = notes.querySelector('.header');
 notesHeader.innerHTML = '<span>🧠 Notes & Adjustments for the Week</span>';
-notesHeader.querySelector('span').style.fontSize = '20px';
-notesHeader.querySelector('span').style.fontWeight = 'bold';
-notesHeader.style.marginTop = '50px'; // Adjust the value as needed
-notesHeader.style.marginBottom = '30px'; // Adjust the value as needed
+//notesHeader.querySelector('span').style.fontSize = '24px';
+//notesHeader.querySelector('span').style.fontWeight = 'bold';
+//notesHeader.style.marginTop = '50px'; // Adjust the value as needed
+//notesHeader.style.marginBottom = '30px'; // Adjust the value as needed
 
 let notesInput = document.createElement('div');
 notesInput.classList.add('notes-input');
@@ -235,9 +235,9 @@ document.querySelector('.grid-1').appendChild(container);
 function createPermanentRow() {
     const row = document.createElement('div');
     row.classList.add('grid-row', 'grid-header');
-    row.style.display = 'grid';
-    row.style.columnGap = '10px';
-    row.style.gridTemplateColumns = '.5fr 1fr auto';
+    //row.style.display = 'grid';
+    //row.style.columnGap = '10px';
+    //row.style.gridTemplateColumns = '.5fr 1fr auto';
     row.style.fontWeight = 'bold';
 
     const areaCell = document.createElement('div');
@@ -397,7 +397,7 @@ createPermanentRow();
     deleteButton.style.fontSize = '25px';
     deleteButton.style.background = 'none';
     deleteButton.style.border = 'none';
-    deleteButton.onmouseenter = () => deleteButton.style.opacity = '0.7';
+    deleteButton.onmouseenter = () => deleteButton.style.opacity = '0.6';
     deleteButton.onmouseleave = () => deleteButton.style.opacity = '1';
     deleteButton.style.padding = '5px 36px';
     /*deleteButton.textContent = 'Delete Row';
@@ -551,10 +551,10 @@ export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     }
 
     habitTrackerHead.innerHTML = '📊 Daily Habit Tracker';
-    habitTrackerHead.style.marginTop = '30px';
-    habitTrackerHead.style.marginBottom = '20px';
-    habitTrackerHead.style.fontSize = '20px';
-    habitTrackerHead.style.fontWeight = 'bold';
+    //habitTrackerHead.style.marginTop = '30px';
+   // habitTrackerHead.style.marginBottom = '20px';
+    //habitTrackerHead.style.fontSize = '20px';
+    //habitTrackerHead.style.fontWeight = 'bold';
 
     localStorage.setItem('habitTrackerHeader', habitTrackerHead.innerText);
 
@@ -577,6 +577,7 @@ export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     headChecklist.style.gridTemplateRows = 'repeat(8, auto)';
 
     const dayHead = document.createElement('div');
+    dayHead.classList.add('day-head');
     dayHead.innerText = 'Day';
     dayHead.style.border = '1px solid lightgrey';
     dayHead.style.padding = '10px';
@@ -588,6 +589,7 @@ export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     const daysArray = 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
     daysArray.forEach((day, rowIndex) => {
         const dayCell = document.createElement('div');
+        dayCell.classList.add('day-cell');
         dayCell.innerText = day;
         dayCell.style.padding = '10px';
         dayCell.style.textAlign = 'center';
@@ -725,8 +727,8 @@ recapInput.addEventListener('input', () => {
     const weekRange = getCurrentWeekRange(); // Recalculate in case the week changed
     localStorage.setItem(`weekRecap-${weekRange}`, recapInput.innerText);
 });
-weekReview.querySelector('span').style.fontSize = '20px';
-weekReview.querySelector('span').style.fontWeight = 'bold'; 
+//weekReview.querySelector('span').style.fontSize = '20px';
+//weekReview.querySelector('span').style.fontWeight = 'bold'; 
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -771,7 +773,7 @@ export function applyDarkModeStyles(isDarkMode, calendarPopup = null) {
 
     document.querySelectorAll('.area-cell').forEach(header => {
         if (isDarkMode) {
-            header.style.backgroundColor = 'black';
+            header.style.backgroundColor = '#333';
             header.style.color = '#fff';
         } else {
             header.style.backgroundColor = '#f0f0f0';
@@ -781,7 +783,7 @@ export function applyDarkModeStyles(isDarkMode, calendarPopup = null) {
 
     document.querySelectorAll('.goal-cell').forEach(header => {
         if (isDarkMode) {
-            header.style.backgroundColor = 'black';
+            header.style.backgroundColor = '#333';
             header.style.color = '#fff';
         } else {
             header.style.backgroundColor = '#f0f0f0';
@@ -789,7 +791,12 @@ export function applyDarkModeStyles(isDarkMode, calendarPopup = null) {
         }
     });
 
-
+    document.querySelectorAll('.headChecklist, .day-cell, .day-head').forEach(el => {
+        el.style.backgroundColor = isDarkMode ? '#333' : '#f0f0f0';
+        el.style.color = isDarkMode ? '#fff' : '#000';
+      });
+      
+      
     document.querySelectorAll('.grid-cell').forEach(cell => {
         cell.style.backgroundColor = isDarkMode ? '#444' : '#fff';
         cell.style.color = isDarkMode ? '#ddd' : '#000';

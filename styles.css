@@ -1,4 +1,5 @@
 * {
+    font-family: Helvetica, Arial, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -10,14 +11,16 @@
 
 .header > .week {
     font-weight: bold;
-    font-size: 18px;
-    padding-bottom: 10px;
+    font-size: 24px;
+    padding-top: 30px;
 }
 
 .header > .primary-focus {
     display: flex;
     gap: 10px;
-    padding-bottom: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-left: 170px; /* Adjusted for better alignment */
 }
 
 .header > .week {
@@ -200,4 +203,58 @@
 
 .recap {
     margin-top: 60px;
+}
+
+.grid-row {
+    max-width: 1400px;
+    display: grid;
+    grid-template-columns: 0.5fr 1fr auto;  /* example layout */
+    column-gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto; 
+}
+
+.notes {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.habit-tracker {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.recap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.recap-input {
+    display: block;
+    text-align: center;
+    justify-content:center;
+}
+
+.notes > .header {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 50px;
+    margin-bottom: 40px;
+}
+
+.habit-tracker > .header {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 50px;
+    margin-bottom: 40px;
+}
+
+.recap > span {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 50px;
 }
