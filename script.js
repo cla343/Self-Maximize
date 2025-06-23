@@ -667,6 +667,7 @@ export function createPermanentChecklist(weekRange = getDisplayedWeek()) {
     
         const header = document.createElement('div');
         header.innerText = input.innerText || `New Area ${Number(rowId) + 1}`;
+        header.classList.add('areaHeaderChecklist');
         header.style.padding = '10px';
         header.style.textAlign = 'center';
         header.style.border = '1px solid lightgrey';
@@ -762,6 +763,12 @@ export function applyDarkModeStyles(isDarkMode, calendarPopup = null) {
         popup.style.color = isDarkMode ? '#fff' : '#000';
     });
 
+    const checklistHeaders = document.querySelectorAll('.areaHeaderChecklist');
+    checklistHeaders.forEach(header => {
+        header.style.backgroundColor = isDarkMode ? '#333' : '#f0f0f0';
+        header.style.color = isDarkMode ? '#fff' : '#000';
+    });
+     
     document.querySelectorAll('.grid-header').forEach(header => {
         if (isDarkMode) {
             header.style.backgroundColor = '#333';
@@ -791,7 +798,7 @@ export function applyDarkModeStyles(isDarkMode, calendarPopup = null) {
         }
     });
 
-    document.querySelectorAll('.headChecklist, .day-cell, .day-head').forEach(el => {
+    document.querySelectorAll('.day-cell, .day-head').forEach(el => {
         el.style.backgroundColor = isDarkMode ? '#333' : '#f0f0f0';
         el.style.color = isDarkMode ? '#fff' : '#000';
       });
